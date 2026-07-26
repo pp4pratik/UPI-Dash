@@ -123,30 +123,7 @@
     </button>
   </div>
 
-  <div class="card" id="circularBar" style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 18px;margin-bottom:24px;flex-wrap:wrap;">
-    <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text-secondary);">
-      <span style="font-size:16px;">📋</span>
-      <span><b style="color:var(--text);">34 circulars</b> from NPCI (2025–2026) embedded below — no need to visit NPCI</span>
-    </div>
-    <div style="display:flex;align-items:center;gap:14px;">
-      <a href="#circularsSection" style="color:var(--teal);font-size:12.5px;font-family:'JetBrains Mono',monospace;text-decoration:none;white-space:nowrap;">Jump to circulars ↓</a>
-      <button onclick="document.getElementById('circularBar').style.display='none'" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:16px;line-height:1;">×</button>
-    </div>
-  </div>
-
   <div id="viewUPI">
-
-  <div class="hero">
-    <div class="hero-grid">
-      <div>
-        <p class="hero-label" id="heroLabel">June 2026 · total volume</p>
-        <p class="hero-value" id="heroValue">22.72<span>B</span></p>
-        <p class="hero-sub" id="heroSub">worth <b>₹28.92 lakh crore</b> · <b>731 banks</b> live on UPI</p>
-        <div class="chips" id="heroChips"></div>
-      </div>
-      <div><svg class="pulse-svg" viewBox="0 0 400 90" preserveAspectRatio="none"><polyline points="0,75 33,68 66,58 100,60 133,42 166,46 200,32 233,30 266,42 300,10 333,20 366,4 400,10" fill="none" stroke="#F5A524" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg></div>
-    </div>
-  </div>
 
   <div class="kpi-strip" id="kpiStrip"></div>
 
@@ -375,23 +352,6 @@ function sortedApps(){
 var appColors = {"PhonePe":'#F5A524',"Google Pay":'#5B8DEF',"Paytm":'#3FC1A8',"Navi":'#E8654F',"super.money":'#9A7FD1',"BHIM":'#647085',"FamApp":'#5FD97A',"WhatsApp":'#7DD3E0',"CRED":'#E8B4D8',"Axis Bank Apps":'#C9A876',"Others":'#3A4759'};
 
 var trendChart, shareChart, quarterChart;
-
-function renderHero(){
-  var i = months.length-1;
-  document.getElementById('heroLabel').textContent = 'June 2026 · total '+metric;
-  if (metric==='volume'){
-    document.getElementById('heroValue').innerHTML = (mVol[i]/1000).toFixed(2)+'<span>B</span>';
-    document.getElementById('heroSub').innerHTML = 'worth <b>₹'+(mVal[i]/100000).toFixed(2)+' lakh crore</b> · <b>'+banksLive+' banks</b> live on UPI';
-  } else {
-    document.getElementById('heroValue').innerHTML = '₹'+(mVal[i]/100000).toFixed(2)+'<span>L Cr</span>';
-    document.getElementById('heroSub').innerHTML = (mVol[i]/1000).toFixed(2)+'<b> billion</b> transactions · <b>'+banksLive+' banks</b> live on UPI';
-  }
-  var vMom=mom(mVol,i), vlMom=mom(mVal,i);
-  var chipsHtml = '<span class="chip '+(vMom<0?'down':'up')+'">'+(vMom<0?'▼':'▲')+' '+Math.abs(vMom).toFixed(2)+'% volume MoM</span>' +
-    '<span class="chip '+(vlMom<0?'down':'up')+'">'+(vlMom<0?'▼':'▲')+' '+Math.abs(vlMom).toFixed(2)+'% value MoM</span>' +
-    '<span class="chip up">Groceries & supermarkets — top category</span>';
-  document.getElementById('heroChips').innerHTML = chipsHtml;
-}
 
 function renderKPIs(){
   var i = months.length-1;
@@ -677,7 +637,7 @@ function renderAutoPay(){
 }
 
 function renderAll(){
-  renderHero(); renderKPIs(); renderTrendChart(); renderTrendRaw();
+  renderKPIs(); renderTrendChart(); renderTrendRaw();
   renderTop4AndShare(); renderLeaderboard(); renderP2P(); renderCategories(); renderGeo();
   renderQuarter(); renderQuarterRaw(); renderPremiumAndTicket(); renderHeatmap();
   renderCirculars('');
@@ -707,7 +667,7 @@ document.querySelectorAll('#metricToggle .toggle-btn').forEach(function(btn){
     document.querySelectorAll('#metricToggle .toggle-btn').forEach(function(b){b.classList.remove('active');b.setAttribute('aria-selected','false');});
     btn.classList.add('active'); btn.setAttribute('aria-selected','true');
     metric = btn.dataset.metric;
-    renderHero(); renderKPIs(); renderTrendChart(); renderTop4AndShare(); renderLeaderboard(); renderCategories(); renderGeo(); renderQuarter();
+    renderKPIs(); renderTrendChart(); renderTop4AndShare(); renderLeaderboard(); renderCategories(); renderGeo(); renderQuarter();
   });
 });
 
