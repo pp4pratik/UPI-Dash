@@ -1,0 +1,16 @@
+{
+  "baseId": "appbVBAj5OHS5xYQ6",
+  "baseName": "UPI Pulse",
+  "workspaceId": "wspKvWicseBLKSiPY",
+  "tables": {
+    "Monthly Trend": "tbliHFo7ZrJKq7pU2",
+    "App Stats": "tbl0uTMzxvPbw9RlH",
+    "P2P P2M": "tbl5e3lETClbYy674",
+    "Merchant Categories": "tblPEl6Svhm6OHSRj",
+    "Statewise": "tbluIM8wEivp4XLzw",
+    "Circulars": "tblbsTKu2FFBJuWBK",
+    "AutoPay Registrations": "tblYeOUkZv2f3p8E4",
+    "AutoPay Executions": "tbltJYNfIiokxfD5d",
+    "PSP Member Performance": "tblOOAaCy8iGYPkwB"
+  }
+}

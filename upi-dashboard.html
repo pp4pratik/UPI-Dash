@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UPI Pulse — India's Digital Payments Tracker</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap');
+  :root{
+    --bg:#0A121D; --surface:#111C2B; --surface2:#17263A;
+    --border:rgba(255,255,255,0.08);
+    --text:#EAEEF3; --text-secondary:#9AA8BC; --text-muted:#647085;
+    --marigold:#F5A524; --marigold-dim:rgba(245,165,36,0.14);
+    --teal:#3FC1A8; --teal-dim:rgba(63,193,168,0.14);
+    --coral:#E8654F; --blue:#5B8DEF; --green:#5FD97A; --red:#F4715C;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1180px;margin:0 auto;padding:40px 32px 64px;}
+  .eyebrow{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.12em;text-transform:uppercase;color:var(--marigold);margin:0 0 10px;display:flex;align-items:center;gap:10px;}
+  .eyebrow .dot{width:7px;height:7px;border-radius:50%;background:var(--marigold);animation:pulse 2s infinite;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.25;}}
+  h1{font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:36px;letter-spacing:-0.02em;margin:0 0 6px;}
+  .subtitle{color:var(--text-secondary);font-size:15px;margin:0 0 24px;max-width:680px;line-height:1.6;}
+  .controls-row{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px;}
+  .toggle{display:inline-flex;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:4px;gap:4px;}
+  .toggle-btn{font-family:'Inter',sans-serif;font-size:13.5px;font-weight:500;color:var(--text-secondary);background:transparent;border:none;border-radius:7px;padding:8px 18px;cursor:pointer;transition:background 0.15s,color 0.15s;}
+  .toggle-btn.active{background:var(--marigold-dim);color:var(--marigold);}
+  .toggle-btn.active.metric{background:var(--teal-dim);color:var(--teal);}
+  .toggle-btn:hover:not(.active){color:var(--text);}
+  .btn-ghost{display:flex;align-items:center;gap:7px;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:'Inter',sans-serif;font-size:12.5px;font-weight:500;border-radius:8px;padding:8px 14px;cursor:pointer;}
+  .btn-ghost:hover{border-color:rgba(255,255,255,0.2);}
+  .btn-ghost svg{flex-shrink:0;}
+  .tag{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--teal);background:var(--teal-dim);border-radius:20px;padding:6px 12px;}
+  .hero{position:relative;background:linear-gradient(180deg, var(--surface) 0%, var(--surface2) 100%);border:1px solid var(--border);border-radius:16px;padding:32px 36px;margin-bottom:20px;overflow:hidden;}
+  .hero-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:32px;align-items:center;position:relative;z-index:1;}
+  .hero-label{font-size:13px;color:var(--text-secondary);margin:0 0 8px;font-family:'JetBrains Mono',monospace;}
+  .hero-value{font-family:'Space Grotesk',sans-serif;font-size:64px;font-weight:700;letter-spacing:-0.03em;line-height:1;margin:0 0 8px;color:var(--text);}
+  .hero-value span{color:var(--marigold);}
+  .hero-sub{font-size:16px;color:var(--text-secondary);margin:0 0 18px;}
+  .hero-sub b{color:var(--text);font-weight:600;}
+  .chips{display:flex;gap:10px;flex-wrap:wrap;}
+  .chip{font-family:'JetBrains Mono',monospace;font-size:12.5px;padding:6px 12px;border-radius:20px;display:flex;align-items:center;gap:6px;}
+  .chip.up{background:rgba(95,217,122,0.12);color:var(--green);}
+  .chip.down{background:rgba(244,113,92,0.12);color:var(--red);}
+  .pulse-svg{width:100%;height:90px;opacity:0.55;}
+  .kpi-strip{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:32px;}
+  .kpi-strip.four{grid-template-columns:repeat(4,1fr);}
+  .kpi{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px 20px;}
+  .kpi-label{font-size:12px;color:var(--text-muted);margin:0 0 8px;text-transform:uppercase;letter-spacing:0.06em;}
+  .kpi-value{font-family:'Space Grotesk',sans-serif;font-size:22px;font-weight:600;margin:0;}
+  .kpi-sub{font-size:12px;color:var(--text-secondary);margin:4px 0 0;}
+  .kpi-sub.down{color:var(--red);} .kpi-sub.up{color:var(--green);}
+  .section{margin-bottom:36px;}
+  .section-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:16px;flex-wrap:wrap;gap:8px;}
+  .section-title{font-family:'Space Grotesk',sans-serif;font-size:18px;font-weight:600;margin:0;}
+  .section-note{font-size:12.5px;color:var(--text-muted);margin:0;}
+  .section-actions{display:flex;gap:8px;align-items:center;}
+  .mini-btn{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--text-secondary);background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:5px 10px;cursor:pointer;white-space:nowrap;}
+  .mini-btn:hover{color:var(--text);}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px 24px;}
+  .row-2{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+  .legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:14px;font-size:12.5px;color:var(--text-secondary);}
+  .legend span{display:inline-flex;align-items:center;gap:6px;}
+  .legend i{width:9px;height:9px;border-radius:2px;display:inline-block;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{text-align:left;color:var(--text-muted);font-weight:500;font-size:11.5px;text-transform:uppercase;letter-spacing:0.05em;padding:0 10px 10px;border-bottom:1px solid var(--border);}
+  td{padding:10px;border-bottom:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:13px;}
+  td.name{font-family:'Inter',sans-serif;font-size:13.5px;}
+  tr:last-child td{border-bottom:none;}
+  .bar-cell{display:flex;align-items:center;gap:8px;}
+  .bar-track{flex:1;height:6px;background:var(--surface2);border-radius:3px;overflow:hidden;}
+  .bar-fill{height:100%;border-radius:3px;background:var(--marigold);}
+  .raw-panel{display:none;margin-top:16px;max-height:340px;overflow:auto;border-top:1px solid var(--border);padding-top:14px;}
+  .raw-panel.open{display:block;}
+  .raw-panel table{font-size:12px;}
+  .heatmap{width:100%;border-collapse:separate;border-spacing:3px;font-size:11.5px;}
+  .heatmap th{text-align:center;color:var(--text-muted);font-weight:500;padding:4px;border:none;}
+  .heatmap td{text-align:center;padding:8px 4px;border-radius:5px;font-family:'JetBrains Mono',monospace;border:none;color:#0A121D;font-weight:600;}
+  .heatmap td.na{background:var(--surface2);color:var(--text-muted);font-weight:400;}
+  .heatmap td.rowlabel{background:transparent;color:var(--text-secondary);font-family:'Inter',sans-serif;text-align:left;font-weight:500;}
+  .circular-search{width:100%;padding:9px 12px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-family:'Inter',sans-serif;font-size:13px;margin-bottom:12px;}
+  .circular-list{max-height:420px;overflow:auto;}
+  .fy-badge{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:10.5px;color:var(--marigold);border:1px solid var(--marigold);border-radius:4px;padding:2px 6px;margin-right:10px;white-space:nowrap;}
+  .footer{margin-top:44px;padding-top:24px;border-top:1px solid var(--border);}
+  .footer-title{font-size:12px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin:0 0 12px;}
+  .sources{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:12.5px;color:var(--text-secondary);margin:0 0 14px;}
+  .sources a{color:var(--teal);text-decoration:none;}
+  .sources a:hover{text-decoration:underline;}
+  .disclaimer{font-size:12px;color:var(--text-muted);line-height:1.6;max-width:820px;}
+  @media(max-width:820px){
+    .hero-grid{grid-template-columns:1fr;}
+    .kpi-strip, .kpi-strip.four{grid-template-columns:repeat(2,1fr);}
+    .row-2{grid-template-columns:1fr;}
+    .hero-value{font-size:44px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <p class="eyebrow"><span class="dot"></span>NPCI · UPI ecosystem tracker</p>
+  <h1>UPI Pulse</h1>
+  <p class="subtitle">Monthly trends, app leaderboard, seasonality, ticket size, and circulars for India's Unified Payments Interface — every number and raw table sourced directly from NPCI, no click-through required.</p>
+
+  <div class="controls-row">
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <div class="toggle" id="viewToggle" role="tablist">
+        <button class="toggle-btn active" data-view="upi" role="tab" aria-selected="true">UPI</button>
+        <button class="toggle-btn" data-view="autopay" role="tab" aria-selected="false">UPI AutoPay</button>
+      </div>
+      <div class="toggle" id="metricToggle" role="tablist">
+        <button class="toggle-btn active metric" data-metric="volume" role="tab" aria-selected="true">Volume</button>
+        <button class="toggle-btn" data-metric="value" role="tab" aria-selected="false">Value</button>
+      </div>
+    </div>
+    <button class="btn-ghost" id="downloadAllBtn">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 19h16"/></svg>
+      Download all data (CSV)
+    </button>
+  </div>
+
+  <div class="card" id="circularBar" style="display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 18px;margin-bottom:24px;flex-wrap:wrap;">
+    <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text-secondary);">
+      <span style="font-size:16px;">📋</span>
+      <span><b style="color:var(--text);">34 circulars</b> from NPCI (2025–2026) embedded below — no need to visit NPCI</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:14px;">
+      <a href="#circularsSection" style="color:var(--teal);font-size:12.5px;font-family:'JetBrains Mono',monospace;text-decoration:none;white-space:nowrap;">Jump to circulars ↓</a>
+      <button onclick="document.getElementById('circularBar').style.display='none'" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:16px;line-height:1;">×</button>
+    </div>
+  </div>
+
+  <div id="viewUPI">
+
+  <div class="hero">
+    <div class="hero-grid">
+      <div>
+        <p class="hero-label" id="heroLabel">June 2026 · total volume</p>
+        <p class="hero-value" id="heroValue">22.72<span>B</span></p>
+        <p class="hero-sub" id="heroSub">worth <b>₹28.92 lakh crore</b> · <b>731 banks</b> live on UPI</p>
+        <div class="chips" id="heroChips"></div>
+      </div>
+      <div><svg class="pulse-svg" viewBox="0 0 400 90" preserveAspectRatio="none"><polyline points="0,75 33,68 66,58 100,60 133,42 166,46 200,32 233,30 266,42 300,10 333,20 366,4 400,10" fill="none" stroke="#F5A524" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg></div>
+    </div>
+  </div>
+
+  <div class="kpi-strip" id="kpiStrip"></div>
+
+  <div class="section">
+    <div class="section-head">
+      <p class="section-title">Monthly trend</p>
+      <div class="section-actions">
+        <p class="section-note">Volume (bars) & value (line) · Jun 23 – Jun 26</p>
+        <button class="mini-btn" data-raw="trendRaw">Raw data ▾</button>
+        <button class="mini-btn" data-csv="trend">Download CSV</button>
+      </div>
+    </div>
+    <div class="card">
+      <div style="position:relative;height:300px;"><canvas id="trendChart" role="img" aria-label="Bar and line chart of UPI monthly transaction volume and value from June 2023 to June 2026"></canvas></div>
+      <p class="section-note" style="margin-top:10px;">April and May are missing for 2024 and 2025 — NPCI's published tables did not include those months.</p>
+      <div class="raw-panel" id="trendRaw"></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head"><p class="section-title">Top apps this month</p><p class="section-note">June 2026</p></div>
+    <div class="row-2">
+      <div class="card" id="top4Cards"></div>
+      <div class="card">
+        <div style="position:relative;height:220px;"><canvas id="shareChart" role="img" aria-label="Doughnut chart of UPI app market share"></canvas></div>
+        <div class="legend" id="shareLegend"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head">
+      <p class="section-title">Leaderboard — top 10 apps</p>
+      <div class="section-actions"><p class="section-note">June 2026 · sorted by selected metric</p><button class="mini-btn" data-csv="leaderboard">Download CSV</button></div>
+    </div>
+    <div class="card"><table><thead><tr><th>#</th><th>App</th><th>Volume (Mn)</th><th>Value (₹ Cr)</th><th>Avg ticket (₹)</th><th>Share</th></tr></thead><tbody id="leaderTable"></tbody></table></div>
+  </div>
+
+  <div class="section">
+    <div class="row-2">
+      <div class="card">
+        <div class="section-head"><p class="section-title">P2P vs P2M split</p><p class="section-note">June 2026</p></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div><p class="section-note" style="text-align:center;margin:0 0 6px;">By volume</p><div style="position:relative;height:160px;"><canvas id="p2pVolChart"></canvas></div></div>
+          <div><p class="section-note" style="text-align:center;margin:0 0 6px;">By value</p><div style="position:relative;height:160px;"><canvas id="p2pValChart"></canvas></div></div>
+        </div>
+        <div class="legend"><span><i style="background:#F5A524"></i>P2M</span><span><i style="background:#3FC1A8"></i>P2P</span></div>
+      </div>
+      <div class="card">
+        <div class="section-head"><p class="section-title">Top merchant categories</p><div class="section-actions"><p class="section-note">June 2026</p><button class="mini-btn" data-csv="category">CSV</button></div></div>
+        <table><thead><tr><th>Category</th><th id="catVolHead">Volume (Mn)</th><th id="catValHead">Value (₹ Cr)</th></tr></thead><tbody id="categoryTable"></tbody></table>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head">
+      <p class="section-title">Geography — top districts nationally</p>
+      <div class="section-actions"><p class="section-note">June 2026 · NPCI reports at district level</p><button class="mini-btn" data-csv="geo">Download CSV</button></div>
+    </div>
+    <div class="card">
+      <table><thead><tr><th>District</th><th>Volume share</th><th>Value share</th></tr></thead><tbody id="geoTable"></tbody></table>
+      <p class="section-note" style="margin-top:16px;">All ten highest-volume districts nationally sit in Maharashtra — Mumbai's metro belt alone accounts for 6.5% of all UPI volume.</p>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="row-2">
+      <div class="card">
+        <div class="section-head"><p class="section-title">App trend — last 3 quarters</p><div class="section-actions"><p class="section-note">Dec'25 / Mar'26 / Jun'26</p><button class="mini-btn" data-raw="quarterRaw">Raw ▾</button><button class="mini-btn" data-csv="quarter">CSV</button></div></div>
+        <div style="position:relative;height:220px;"><canvas id="quarterChart" role="img" aria-label="Line chart of quarterly trend for top 5 UPI apps"></canvas></div>
+        <div class="raw-panel" id="quarterRaw"></div>
+      </div>
+      <div class="card">
+        <div class="section-head"><p class="section-title">Premiumness index</p><p class="section-note">Value share ÷ volume share</p></div>
+        <div style="position:relative;height:220px;"><canvas id="premiumChart" role="img" aria-label="Bar chart of premiumness index by app"></canvas></div>
+        <p class="section-note" style="margin-top:10px;">Above 1× = larger-than-average tickets. Below 1× = mostly micro-transactions. Computed by this dashboard from NPCI's volume/value figures.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head"><p class="section-title">Average ticket size</p><div class="section-actions"><p class="section-note">June 2026, ₹ per transaction</p><button class="mini-btn" data-csv="ticket">CSV</button></div></div>
+    <div class="card"><div style="position:relative;height:240px;"><canvas id="ticketChart" role="img" aria-label="Bar chart of average ticket size by app"></canvas></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-head"><p class="section-title">Seasonality — month-on-month growth</p><div class="section-actions"><p class="section-note">Computed from NPCI's monthly series, 2023–2026</p><button class="mini-btn" data-csv="seasonality">Download CSV</button></div></div>
+    <div class="card" style="overflow-x:auto;">
+      <table class="heatmap" id="heatmapTable"></table>
+      <p class="section-note" style="margin-top:14px;">March consistently sees the strongest jump (year-end push), February the weakest. Blank cells are months NPCI hasn't published or hasn't happened yet.</p>
+    </div>
+  </div>
+
+  <div class="section" id="circularsSection">
+    <div class="section-head">
+      <p class="section-title">Circulars & notifications</p>
+      <div class="section-actions"><p class="section-note">NPCI · UPI · 2025–2026, newest first</p><button class="mini-btn" data-csv="circulars">Download CSV</button></div>
+    </div>
+    <div class="card">
+      <input type="text" class="circular-search" id="circularSearch" placeholder="Search circulars by keyword or OC number...">
+      <div class="circular-list"><table><thead><tr><th>Ref</th><th>FY</th><th>Title</th></tr></thead><tbody id="circularTable"></tbody></table></div>
+      <p class="section-note" style="margin-top:14px;">Covers all circulars listed under NPCI's 2025 and 2026 filters (34 total). Earlier years (2022–2024) and archived circulars are on <a href="https://www.npci.org.in/circulars/upi" target="_blank" rel="noopener" style="color:var(--teal);">NPCI's site</a> directly.</p>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p class="footer-title">Source</p>
+    <div class="sources">
+      <a href="https://www.npci.org.in/product/upi/product-statistics" target="_blank" rel="noopener">NPCI — UPI Product Statistics</a>
+      <a href="https://www.npci.org.in/product/ecosystem-statistics/upi" target="_blank" rel="noopener">NPCI — UPI Ecosystem Statistics</a>
+      <a href="https://www.npci.org.in/circulars/upi" target="_blank" rel="noopener">NPCI — UPI Circulars & Notifications</a>
+    </div>
+    <p class="disclaimer">All figures pulled directly from NPCI's official statistics pages on 26 Jul 2026. App-wise figures reflect December 2025, March 2026 and June 2026 — NPCI's app-wise tables only show one month at a time, so the quarterly trend uses those three pulls rather than every month. Premiumness index and ticket size are computed by this dashboard from NPCI's volume/value figures, not published directly by NPCI. April and May 2024/2025 are absent from NPCI's monthly series as published. NPCI states it makes no warranty on completeness or continued validity of this data.</p>
+  </div>
+
+  </div>
+
+  <div id="viewAutopay" style="display:none;">
+    <div class="hero">
+      <div class="hero-grid">
+        <div>
+          <p class="hero-label">May 2026 · mandate executions (top remitter banks)</p>
+          <p class="hero-value">2.10<span>B</span></p>
+          <p class="hero-sub">recurring debits processed across the top 20 remitter banks</p>
+          <div class="chips"><span class="chip up">~102M new registrations, May 2026</span></div>
+        </div>
+        <div><svg class="pulse-svg" viewBox="0 0 400 90" preserveAspectRatio="none"><polyline points="0,75 60,72 100,68 140,58 180,50 220,42 260,35 300,28 340,20 400,10" fill="none" stroke="#3FC1A8" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg></div>
+      </div>
+    </div>
+    <div class="kpi-strip four">
+      <div class="kpi"><p class="kpi-label">Registrations, May 2026</p><p class="kpi-value">101.8M</p><p class="kpi-sub">across 13 payer PSPs</p></div>
+      <div class="kpi"><p class="kpi-label">Weighted approval rate</p><p class="kpi-value">~24.4%</p><p class="kpi-sub">of execution attempts</p></div>
+      <div class="kpi"><p class="kpi-label">Weighted business decline</p><p class="kpi-value">~74.9%</p><p class="kpi-sub">insufficient balance & similar</p></div>
+      <div class="kpi"><p class="kpi-label">Weighted technical decline</p><p class="kpi-value">~0.7%</p><p class="kpi-sub">bank/NPCI system issues</p></div>
+    </div>
+    <div class="section">
+      <div class="section-head"><p class="section-title">Registrations by PSP</p><div class="section-actions"><p class="section-note">May 2026</p><button class="mini-btn" data-csv="autopayReg">CSV</button></div></div>
+      <div class="card"><div style="position:relative;height:260px;"><canvas id="regChart"></canvas></div></div>
+    </div>
+    <div class="section">
+      <div class="row-2">
+        <div class="card">
+          <div class="section-head"><p class="section-title">Execution volume by remitter bank</p><div class="section-actions"><p class="section-note">May 2026</p><button class="mini-btn" data-csv="autopayExec">CSV</button></div></div>
+          <div style="position:relative;height:240px;"><canvas id="execChart"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="section-head"><p class="section-title">Common use cases</p><p class="section-note">Qualitative — NPCI doesn't publish a category split</p></div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;">
+            <span class="tag">Mobile & electricity bills</span><span class="tag">EMI payments</span><span class="tag">OTT subscriptions</span>
+            <span class="tag">Insurance premiums</span><span class="tag">Mutual fund SIPs</span><span class="tag">FASTag & NCMC top-ups</span>
+          </div>
+          <p class="section-note" style="margin-top:16px;">NPCI raised the AFA limit for recurring credit card bill, mutual fund, and insurance payments from ₹15,000 to ₹1,00,000.</p>
+        </div>
+      </div>
+    </div>
+    <div class="footer">
+      <p class="footer-title">Source</p>
+      <div class="sources"><a href="https://www.npci.org.in/product/ecosystem-statistics/autopay" target="_blank" rel="noopener">NPCI — AutoPay Ecosystem Statistics</a></div>
+      <p class="disclaimer">Pulled directly from NPCI's AutoPay Ecosystem Statistics on 26 Jul 2026. June 2026 had no published data at pull time, so May 2026 is shown. Execution figures reflect the top 20 of "Top 50 Remitter Banks" as displayed.</p>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+Chart.defaults.color = '#9AA8BC';
+Chart.defaults.font.family = "'Inter', sans-serif";
+var metric = 'volume'; // global toggle state
+
+// ---------- RAW DATA: monthly series ----------
+var months = ['Jun 23','Jul 23','Aug 23','Sep 23','Oct 23','Nov 23','Dec 23','Jan 24','Feb 24','Mar 24','Apr 24','May 24','Jun 24','Jul 24','Aug 24','Sep 24','Oct 24','Nov 24','Dec 24','Jan 25','Feb 25','Mar 25','Apr 25','May 25','Jun 25','Jul 25','Aug 25','Sep 25','Oct 25','Nov 25','Dec 25','Jan 26','Feb 26','Mar 26','Apr 26','May 26','Jun 26'];
+var mVol = [9335.06,9964.61,10586.02,10555.69,11408.79,11235.29,12020.23,12203.02,12102.67,13440,null,null,13885.14,14435.55,14963.05,15041.75,16584.97,15482.02,16730.01,16996,16106.19,18301.51,null,null,18395.01,19467.95,20008.31,19633.43,20700.92,20466.98,21634.67,21703.44,20394.18,22641.11,22346.8,23201.93,22716.07];
+var mVal = [1475464.26,1533536.44,1576536.56,1579133.18,1715768.34,1739740.61,1822949.42,1841083.97,1827869.35,1978353.23,null,null,2007081.2,2064292.41,2060735.57,2063994.71,2349821.46,2155187.4,2324699.91,2348037.12,2196481.69,2477221.61,null,null,2403930.69,2508498.09,2485472.91,2489736.54,2727790.68,2631632.63,2796712.73,2833481.22,2684229.29,2952542.05,2902988.05,2990424.21,2892138.67];
+var banksLive = 731;
+
+function mom(arr,i){ if(arr[i]==null||arr[i-1]==null) return null; return (arr[i]-arr[i-1])/arr[i-1]*100; }
+function yoy(arr,i){ if(i<12||arr[i]==null||arr[i-12]==null) return null; return (arr[i]-arr[i-12])/arr[i-12]*100; }
+function fmtPct(v){ return v==null?'N/A':(v>0?'+':'')+v.toFixed(2)+'%'; }
+function csvEsc(s){ s=String(s); return (s.indexOf(',')>=0||s.indexOf('"')>=0)? '"'+s.replace(/"/g,'""')+'"' : s; }
+function downloadCSV(filename, rows){
+  var csv = rows.map(function(r){ return r.map(csvEsc).join(','); }).join('\n');
+  var blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a'); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+
+// ---------- RAW DATA: app-quarterly (Dec'25, Mar'26, Jun'26) ----------
+var quarters = ["Dec'25","Mar'26","Jun'26"];
+var qTotalVol = [21634.67, 22641.11, 22716.07];
+var qTotalVal = [2796712.73, 2952542.05, 2892138.67];
+var appData = {
+  "PhonePe":{vol:[9799.14,10503.81,10483.73], val:[1360501.94,1448286.63,1419193.39]},
+  "Google Pay":{vol:[7311.67,7535.71,7407.71], val:[956693.92,999480.47,967055.79]},
+  "Paytm":{vol:[1624.45,1770,1798.84], val:[175716.1,192610.34,192617.38]},
+  "Navi":{vol:[671.89,790.34,842.51], val:[35715.89,43044.76,43948.56]},
+  "super.money":{vol:[286.86,341.24,430.24], val:[11745.61,14788.83,20252.4]},
+  "BHIM":{vol:[155.75,202.44,223.54], val:[20246.97,24718.8,25612.81]},
+  "FamApp":{vol:[159.05,168.6,195.31], val:[2007.01,2250.14,2666.23]},
+  "WhatsApp":{vol:[100.45,130.74,150.48], val:[7399.16,9917.41,11391.85]},
+  "CRED":{vol:[157.25,163.2,141.78], val:[59073.03,62029.55,55116.79]},
+  "Axis Bank Apps":{vol:[144.75,135.4,136.16], val:[13612.02,13180.82,13120.62]}
+};
+var appNames = Object.keys(appData);
+var Q = 2;
+
+var top10VolSum = appNames.reduce(function(s,n){return s+appData[n].vol[Q];},0);
+var top10ValSum = appNames.reduce(function(s,n){return s+appData[n].val[Q];},0);
+var othersVol = qTotalVol[Q]-top10VolSum, othersVal = qTotalVal[Q]-top10ValSum;
+
+function appVolShare(n){ return appData[n].vol[Q]/qTotalVol[Q]*100; }
+function appValShare(n){ return appData[n].val[Q]/qTotalVal[Q]*100; }
+function appTicket(n,q){ return appData[n].val[q]/appData[n].vol[q]*10; }
+function overallTicket(q){ return qTotalVal[q]/qTotalVol[q]*10; }
+function appPremium(n){ return appTicket(n,Q)/overallTicket(Q); }
+
+function sortedApps(){
+  return appNames.slice().sort(function(a,b){
+    return metric==='volume' ? appData[b].vol[Q]-appData[a].vol[Q] : appData[b].val[Q]-appData[a].val[Q];
+  });
+}
+
+var appColors = {"PhonePe":'#F5A524',"Google Pay":'#5B8DEF',"Paytm":'#3FC1A8',"Navi":'#E8654F',"super.money":'#9A7FD1',"BHIM":'#647085',"FamApp":'#5FD97A',"WhatsApp":'#7DD3E0',"CRED":'#E8B4D8',"Axis Bank Apps":'#C9A876',"Others":'#3A4759'};
+
+var trendChart, shareChart, quarterChart;
+
+function renderHero(){
+  var i = months.length-1;
+  document.getElementById('heroLabel').textContent = 'June 2026 · total '+metric;
+  if (metric==='volume'){
+    document.getElementById('heroValue').innerHTML = (mVol[i]/1000).toFixed(2)+'<span>B</span>';
+    document.getElementById('heroSub').innerHTML = 'worth <b>₹'+(mVal[i]/100000).toFixed(2)+' lakh crore</b> · <b>'+banksLive+' banks</b> live on UPI';
+  } else {
+    document.getElementById('heroValue').innerHTML = '₹'+(mVal[i]/100000).toFixed(2)+'<span>L Cr</span>';
+    document.getElementById('heroSub').innerHTML = (mVol[i]/1000).toFixed(2)+'<b> billion</b> transactions · <b>'+banksLive+' banks</b> live on UPI';
+  }
+  var vMom=mom(mVol,i), vlMom=mom(mVal,i);
+  var chipsHtml = '<span class="chip '+(vMom<0?'down':'up')+'">'+(vMom<0?'▼':'▲')+' '+Math.abs(vMom).toFixed(2)+'% volume MoM</span>' +
+    '<span class="chip '+(vlMom<0?'down':'up')+'">'+(vlMom<0?'▼':'▲')+' '+Math.abs(vlMom).toFixed(2)+'% value MoM</span>' +
+    '<span class="chip up">Groceries & supermarkets — top category</span>';
+  document.getElementById('heroChips').innerHTML = chipsHtml;
+}
+
+function renderKPIs(){
+  var i = months.length-1;
+  var topCatVol=3739.59, topCatVal=79705.02;
+  var html = '';
+  if (metric==='volume'){
+    html += '<div class="kpi"><p class="kpi-label">Total volume</p><p class="kpi-value">'+(mVol[i]/1000).toFixed(2)+'B</p><p class="kpi-sub '+(mom(mVol,i)<0?'down':'up')+'">'+fmtPct(mom(mVol,i))+' MoM</p></div>';
+    html += '<div class="kpi"><p class="kpi-label">Volume, 1yr ago</p><p class="kpi-value">'+(mVol[i-12]/1000).toFixed(2)+'B</p><p class="kpi-sub up">'+fmtPct(yoy(mVol,i))+' YoY</p></div>';
+    html += '<div class="kpi"><p class="kpi-label">Top category (volume)</p><p class="kpi-value" style="font-size:16px;">Groceries & supermarkets</p><p class="kpi-sub">'+(topCatVol/1000).toFixed(2)+'B txns · '+(topCatVol/mVol[i]*100).toFixed(1)+'% of volume</p></div>';
+  } else {
+    html += '<div class="kpi"><p class="kpi-label">Total value</p><p class="kpi-value">₹'+(mVal[i]/100000).toFixed(2)+'L Cr</p><p class="kpi-sub '+(mom(mVal,i)<0?'down':'up')+'">'+fmtPct(mom(mVal,i))+' MoM</p></div>';
+    html += '<div class="kpi"><p class="kpi-label">Value, 1yr ago</p><p class="kpi-value">₹'+(mVal[i-12]/100000).toFixed(2)+'L Cr</p><p class="kpi-sub up">'+fmtPct(yoy(mVal,i))+' YoY</p></div>';
+    html += '<div class="kpi"><p class="kpi-label">Top category (value)</p><p class="kpi-value" style="font-size:16px;">Service stations</p><p class="kpi-sub">₹47,183.84 Cr · '+(47183.84/(mVal[i]/100)*100).toFixed(1)+'% of value</p></div>';
+  }
+  document.getElementById('kpiStrip').innerHTML = html;
+}
+
+function renderTrendChart(){
+  var ctx = document.getElementById('trendChart');
+  if (trendChart) trendChart.destroy();
+  var volB = mVol.map(function(v){return v==null?null:v/1000;});
+  var valL = mVal.map(function(v){return v==null?null:v/100000;});
+  trendChart = new Chart(ctx, {
+    data:{ labels:months, datasets:[
+      { type:'bar', label:'Volume (B txns)', data:volB, backgroundColor: metric==='volume'?'#F5A524':'rgba(245,165,36,0.35)', borderRadius:3, yAxisID:'y', order:2, barThickness:10 },
+      { type:'line', label:'Value (₹L cr)', data:valL, borderColor: metric==='value'?'#3FC1A8':'rgba(63,193,168,0.45)', backgroundColor:'#3FC1A8', pointRadius:0, borderWidth:2, tension:0.3, yAxisID:'y1', order:1, spanGaps:true }
+    ]},
+    options:{ responsive:true, maintainAspectRatio:false, interaction:{mode:'index',intersect:false},
+      scales:{ x:{grid:{display:false},ticks:{autoSkip:true,maxTicksLimit:13,maxRotation:0,font:{size:10}}},
+        y:{position:'left',title:{display:true,text:'Volume (B)',font:{size:11}},grid:{color:'rgba(255,255,255,0.06)'}},
+        y1:{position:'right',title:{display:true,text:'Value (₹L cr)',font:{size:11}},grid:{display:false}} },
+      plugins:{legend:{display:false}} }
+  });
+}
+
+function renderTrendRaw(){
+  var rows = '<tr><th>Month</th><th>Volume (Mn)</th><th>MoM %</th><th>YoY %</th><th>Value (Cr)</th><th>MoM %</th><th>YoY %</th></tr>';
+  var html = '<table><thead>'+rows+'</thead><tbody>';
+  for (var i=0;i<months.length;i++){
+    html += '<tr><td class="name">'+months[i]+'</td><td>'+(mVol[i]!=null?mVol[i].toLocaleString('en-IN'):'—')+'</td><td>'+fmtPct(mom(mVol,i))+'</td><td>'+fmtPct(yoy(mVol,i))+'</td>'+
+      '<td>'+(mVal[i]!=null?mVal[i].toLocaleString('en-IN'):'—')+'</td><td>'+fmtPct(mom(mVal,i))+'</td><td>'+fmtPct(yoy(mVal,i))+'</td></tr>';
+  }
+  html += '</tbody></table>';
+  document.getElementById('trendRaw').innerHTML = html;
+}
+
+function renderTop4AndShare(){
+  var order = sortedApps();
+  var top4Html = '';
+  for (var i=0;i<4;i++){
+    var n = order[i];
+    var val = metric==='volume' ? (appData[n].vol[Q]/1000).toFixed(2)+'B' : '₹'+(appData[n].val[Q]/100000).toFixed(2)+'L Cr';
+    var share = metric==='volume' ? appVolShare(n) : appValShare(n);
+    top4Html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:12px 0;'+(i<3?'border-bottom:1px solid var(--border);':'')+'">' +
+      '<div style="display:flex;align-items:center;gap:12px;"><span style="color:var(--text-muted);font-family:JetBrains Mono,monospace;font-size:12px;width:22px;display:inline-block;">#'+(i+1)+'</span><span style="font-weight:500;">'+n+'</span></div>' +
+      '<div style="text-align:right;"><div style="font-family:Space Grotesk,sans-serif;font-size:16px;">'+val+'</div><div style="font-size:11px;color:var(--text-muted);">'+share.toFixed(1)+'% share</div></div></div>';
+  }
+  document.getElementById('top4Cards').innerHTML = top4Html;
+
+  var labels = order.concat(['Others']);
+  var data = order.map(function(n){ return metric==='volume'?appVolShare(n):appValShare(n); });
+  data.push(metric==='volume' ? othersVol/qTotalVol[Q]*100 : othersVal/qTotalVal[Q]*100);
+  var colors = labels.map(function(n){return appColors[n]||'#3A4759';});
+  if (shareChart) shareChart.destroy();
+  shareChart = new Chart(document.getElementById('shareChart'), { type:'doughnut',
+    data:{ labels:labels, datasets:[{data:data.map(function(d){return +d.toFixed(2);}), backgroundColor:colors, borderColor:'#111C2B', borderWidth:2}] },
+    options:{ responsive:true, maintainAspectRatio:false, cutout:'60%', plugins:{legend:{display:false}} } });
+  var legendHtml='';
+  for (var j=0;j<5;j++){ legendHtml += '<span><i style="background:'+colors[j]+'"></i>'+labels[j]+' '+data[j].toFixed(1)+'%</span>'; }
+  document.getElementById('shareLegend').innerHTML = legendHtml;
+}
+
+function renderLeaderboard(){
+  var order = sortedApps();
+  var html = '';
+  order.forEach(function(n,i){
+    var share = metric==='volume' ? appVolShare(n) : appValShare(n);
+    html += '<tr><td>'+(i+1)+'</td><td class="name">'+n+'</td><td>'+appData[n].vol[Q].toLocaleString('en-IN',{maximumFractionDigits:1})+'</td><td>'+appData[n].val[Q].toLocaleString('en-IN',{maximumFractionDigits:0})+'</td><td>₹'+appTicket(n,Q).toFixed(0)+'</td><td>'+share.toFixed(2)+'%</td></tr>';
+  });
+  document.getElementById('leaderTable').innerHTML = html;
+}
+
+function renderP2P(){
+  var vol = {p2m:63.52, p2p:36.48}, val = {p2m:29.77, p2p:70.23};
+  ['p2pVolChart','p2pValChart'].forEach(function(id,idx){
+    var d = idx===0?[vol.p2m,vol.p2p]:[val.p2m,val.p2p];
+    new Chart(document.getElementById(id), { type:'doughnut', data:{labels:['P2M','P2P'],datasets:[{data:d,backgroundColor:['#F5A524','#3FC1A8'],borderColor:'#111C2B',borderWidth:2}]},
+      options:{responsive:true,maintainAspectRatio:false,cutout:'58%',plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return c.label+': '+c.raw+'%';}}}}} });
+  });
+}
+
+function renderCategories(){
+  var categories = [
+    {name:'Groceries and supermarkets', vol:3739.59, val:79705.02},
+    {name:'Fast food restaurants', vol:1449.1, val:17418.12},
+    {name:'Eating places and restaurants', vol:1242.19, val:21485.16},
+    {name:'Telecommunication services, including local and long distance calls, credit card calls, calls through use of magnetic stripe reading telephones and faxes', vol:824.26, val:22964.97},
+    {name:'Service stations (with or without ancillary services)', vol:716.87, val:47183.84}
+  ];
+  categories.sort(function(a,b){ return metric==='volume' ? b.vol-a.vol : b.val-a.val; });
+  var html='';
+  categories.forEach(function(c){ html += '<tr><td class="name">'+c.name+'</td><td>'+c.vol.toLocaleString('en-IN')+'</td><td>'+c.val.toLocaleString('en-IN')+'</td></tr>'; });
+  document.getElementById('categoryTable').innerHTML = html;
+  window._categories = categories;
+}
+
+function renderGeo(){
+  var geo = [
+    {name:'Mumbai Suburban', vol:2.51, val:2.02},
+    {name:'Pune', vol:1.84, val:1.69},
+    {name:'Thane', vol:1.07, val:0.99},
+    {name:'Mumbai', vol:1.04, val:0.81},
+    {name:'Raigad', vol:0.32, val:0.3},
+    {name:'Nagpur', vol:0.3, val:0.33},
+    {name:'Nashik', vol:0.29, val:0.33},
+    {name:'Palghar', vol:0.26, val:0.24},
+    {name:'Chhatrapati Sambhaji Nagar', vol:0.22, val:0.23},
+    {name:'Solapur', vol:0.19, val:0.24}
+  ];
+  geo.sort(function(a,b){ return metric==='volume' ? b.vol-a.vol : b.val-a.val; });
+  var maxV = Math.max.apply(null, geo.map(function(g){return metric==='volume'?g.vol:g.val;}));
+  var html='';
+  geo.forEach(function(g){
+    var v = metric==='volume'?g.vol:g.val;
+    var pct=(v/maxV*100).toFixed(0);
+    html += '<tr><td class="name">'+g.name+'</td><td><div class="bar-cell"><div class="bar-track"><div class="bar-fill" style="width:'+(metric==='volume'?pct:0)+'%"></div></div><span>'+g.vol+'%</span></div></td><td><div class="bar-cell"><div class="bar-track"><div class="bar-fill" style="width:'+(metric==='value'?pct:0)+'%;background:#3FC1A8"></div></div><span>'+g.val+'%</span></div></td></tr>';
+  });
+  document.getElementById('geoTable').innerHTML = html;
+  window._geo = geo;
+}
+
+function renderQuarter(){
+  var top5 = ['PhonePe','Google Pay','Paytm','Navi','super.money'];
+  var datasets = top5.map(function(n){
+    var d = metric==='volume' ? appData[n].vol.map(function(v){return v/1000;}) : appData[n].val.map(function(v){return v/100000;});
+    return {label:n, data:d, borderColor:appColors[n], backgroundColor:appColors[n], tension:0.3};
+  });
+  if (quarterChart) quarterChart.destroy();
+  quarterChart = new Chart(document.getElementById('quarterChart'), { type:'line', data:{labels:quarters, datasets:datasets},
+    options:{ responsive:true, maintainAspectRatio:false, scales:{x:{grid:{display:false}},y:{title:{display:true,text:metric==='volume'?'Volume (B)':'Value (₹L cr)',font:{size:11}},grid:{color:'rgba(255,255,255,0.06)'}}},
+      plugins:{legend:{display:true,position:'bottom',labels:{boxWidth:10,font:{size:11}}}} } });
+}
+
+function renderQuarterRaw(){
+  var html = '<table><thead><tr><th>App</th><th>Dec\'25 Vol(Mn)</th><th>Mar\'26 Vol(Mn)</th><th>Jun\'26 Vol(Mn)</th><th>Dec\'25 Val(Cr)</th><th>Mar\'26 Val(Cr)</th><th>Jun\'26 Val(Cr)</th></tr></thead><tbody>';
+  appNames.forEach(function(n){
+    var d=appData[n];
+    html += '<tr><td class="name">'+n+'</td><td>'+d.vol[0].toLocaleString('en-IN')+'</td><td>'+d.vol[1].toLocaleString('en-IN')+'</td><td>'+d.vol[2].toLocaleString('en-IN')+'</td><td>'+d.val[0].toLocaleString('en-IN')+'</td><td>'+d.val[1].toLocaleString('en-IN')+'</td><td>'+d.val[2].toLocaleString('en-IN')+'</td></tr>';
+  });
+  html += '</tbody></table>';
+  document.getElementById('quarterRaw').innerHTML = html;
+}
+
+function renderPremiumAndTicket(){
+  var order = appNames.slice().sort(function(a,b){ return appPremium(b)-appPremium(a); });
+  var premData = order.map(function(n){ return +appPremium(n).toFixed(2); });
+  new Chart(document.getElementById('premiumChart'), { type:'bar',
+    data:{ labels:order, datasets:[{data:premData, backgroundColor:premData.map(function(v){return v>1?'#3FC1A8':'#F5A524';}), borderRadius:4}] },
+    options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false,
+      scales:{x:{grid:{color:'rgba(255,255,255,0.06)'},title:{display:true,text:'Index (1× = average)',font:{size:11}}},y:{grid:{display:false}}},
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return c.raw+'×';}}}} } });
+
+  var tOrder = appNames.slice().sort(function(a,b){ return appTicket(b,Q)-appTicket(a,Q); });
+  var tData = tOrder.map(function(n){ return +appTicket(n,Q).toFixed(0); });
+  new Chart(document.getElementById('ticketChart'), { type:'bar',
+    data:{ labels:tOrder, datasets:[{label:'₹ per txn', data:tData, backgroundColor:'#F5A524', borderRadius:4}] },
+    options:{ responsive:true, maintainAspectRatio:false,
+      scales:{x:{grid:{display:false}},y:{grid:{color:'rgba(255,255,255,0.06)'},title:{display:true,text:'₹ per transaction',font:{size:11}}}},
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return '₹'+c.raw.toLocaleString('en-IN');}}}} } });
+  window._premOrder=order; window._premData=premData; window._tOrder=tOrder; window._tData=tData;
+}
+
+var heatMonths = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+var heatYears = [2023,2024,2025,2026];
+function heatCell(year, monthIdx){
+  var label = heatMonths[monthIdx]+' '+String(year).slice(2);
+  var gi = months.indexOf(label);
+  if (gi<0) return null;
+  return mom(mVol, gi);
+}
+function renderHeatmap(){
+  var rows = heatYears.map(function(y){ return {label:String(y), data: heatMonths.map(function(m,mi){ return heatCell(y,mi); })}; });
+  var avgRow = {label:'AVG', data: heatMonths.map(function(m,mi){
+    var vals = heatYears.map(function(y){return heatCell(y,mi);}).filter(function(v){return v!=null;});
+    return vals.length? vals.reduce(function(a,b){return a+b;},0)/vals.length : null;
+  })};
+  rows.push(avgRow);
+  function heatColor(v){
+    if (v==null) return null;
+    var t=Math.max(-8,Math.min(14,v));
+    if (t>=0){ var p=t/14; return 'rgb('+Math.round(95-p*40)+','+Math.round(90+p*90)+','+Math.round(122-p*40)+')'; }
+    var p2=(-t)/8; return 'rgb('+Math.round(200+p2*40)+','+Math.round(110-p2*40)+','+Math.round(100-p2*30)+')';
+  }
+  var html='<tr><th></th>'; heatMonths.forEach(function(m){html+='<th>'+m+'</th>';}); html+='</tr>';
+  rows.forEach(function(row){
+    html+='<tr><td class="rowlabel">'+row.label+'</td>';
+    row.data.forEach(function(v){ html += v==null? '<td class="na">—</td>' : '<td style="background:'+heatColor(v)+'">'+(v>0?'+':'')+v.toFixed(1)+'</td>'; });
+    html+='</tr>';
+  });
+  document.getElementById('heatmapTable').innerHTML = html;
+  window._heatRows = rows;
+}
+
+var circulars = [
+  {ref:'OC No. 236', fy:'2026-27', title:"Enhancement of International Mobile Application Payment Acceptance through UPI QR in India"},
+  {ref:'OC 235', fy:'2026-27', title:"Revision of TAT for Responding to Fraud and Wrong Credit Chargebacks in URCS Back Office System"},
+  {ref:'OC No. 234', fy:'2026-27', title:"Safeguarding User Information in UPI"},
+  {ref:'OC No. 233', fy:'2026-27', title:"Introduction of Limit Management Member Portal through URCS"},
+  {ref:'OC No. 232', fy:'2026-27', title:"Classification of MCC for Gift Card Voucher Purchase Transactions"},
+  {ref:'OC 226A', fy:'2026-27', title:"Enhancement of Transaction Limit for On-Device Biometric Authentication in UPI"},
+  {ref:'OC No. 208C', fy:'2026-27', title:"(Addendum to OC 208, 208A & 208B) Implementation of NRP & PRD process & arbitration guidelines"},
+  {ref:'OC No. 177A', fy:'2026-27', title:"Addendum to UPI Global Acceptance Limits and Country Code Enablement"},
+  {ref:'OC-128A', fy:'2026-27', title:"Addendum to OC-128 Extension of additional response codes under Deemed Debit for mandate execution"},
+  {ref:'OC No. 100B', fy:'2026-27', title:"Addendum to Mandatory Brand Guidelines for BHIM UPI Merchant QR"},
+  {ref:'PCOMP 001', fy:'2026-27', title:"Initiation of Self-Attestation of Members/Participants for FY2026-27"},
+  {ref:'OC No. 231', fy:'2025-26', title:"Inclusion of purpose code and Lite reference number in adjustment report for UPI URCS Back-office System"},
+  {ref:'OC No. 230A', fy:'2025-26', title:"Addendum to implementation of automated process for reversal of switching fee rebate"},
+  {ref:'OC No. 230', fy:'2025-26', title:"Implementation of Switching fee Rebate for UPI URCS Back-office System"},
+  {ref:'OC No. 229', fy:'2025-26', title:"Implementation of ISD-GSTIN option in URCS back-office system"},
+  {ref:'OC No. 228', fy:'2025-26', title:"Enhancement in UPI Single Block Multiple Debits (UPI Reserve Pay)"},
+  {ref:'OC No. 227', fy:'2025-26', title:"Introduction of \"UPI HELP\" \u2014 a pilot AI powered support for UPI payments"},
+  {ref:'OC No. 226', fy:'2025-26', title:"Introduction of Additional Authentication methods in UPI"},
+  {ref:'OC No. 225', fy:'2025-26', title:"Enabling Cash Withdrawal through MicroATM using UPI at Business Correspondent touch points"},
+  {ref:'OC No. 224', fy:'2025-26', title:"Introduction of Multi-Signatory Accounts of UPI"},
+  {ref:'OC No. 223', fy:'2025-26', title:"Enhancement of UPI Autopay"},
+  {ref:'OC No. 222', fy:'2025-26', title:"Segregation of UPI settlement cycles for Auth and disputes transactions"},
+  {ref:'OC No. 222A', fy:'2025-26', title:"Addendum segregation of UPI settlement cycles for Auth and disputes transactions"},
+  {ref:'OC No. 221', fy:'2025-26', title:"Implementation of L5C compliance penalty in URCS for lite L5 transactions"},
+  {ref:'OC No. 220', fy:'2025-26', title:"Discontinuing the service of UPI Collect Request for Person to Person (P2P) transactions"},
+  {ref:'OC No. 219', fy:'2025-26', title:"FY 25-26 circular \u2014 contact your bank for details"},
+  {ref:'OC No. 218', fy:'2025-26', title:"FY 25-26 circular \u2014 contact your bank for details"},
+  {ref:'OC No. 208B', fy:'2025-26', title:"Addendum to OC 208A Implementation of NRP & PRD process & arbitration guidelines"},
+  {ref:'OC No. 201B', fy:'2025-26', title:"Addendum to OC 201 \u2014 Introduction of IoT devices & software on UPI Circle"},
+  {ref:'OC No. 201A', fy:'2025-26', title:"Introduction of UPI Circle \u2013 Delegated Payments for secondary users \u2013 Full Delegation Additional Requirements"},
+  {ref:'OC No. 193B', fy:'2025-26', title:"Addendum to OC 193 and OC 193A in UPI system"},
+  {ref:'OC No. 193A', fy:'2025-26', title:"Compliance of UPI Technical Specification-TRAN ID 1 in UPI system"},
+  {ref:'OC No. 185B', fy:'2025-26', title:"Addendum to OC 185A - Implementation of higher per transaction limit for specific categories in UPI"},
+  {ref:'OC No. 171A', fy:'2025-26', title:"Addendum to OC 171 Operating Circular for Pre-Sanctioned Credit Lines at Banks through UPI"}
+];
+function renderCirculars(filterText){
+  var html='';
+  circulars.filter(function(c){
+    if (!filterText) return true;
+    var t=(c.ref+' '+c.title).toLowerCase();
+    return t.indexOf(filterText.toLowerCase())>=0;
+  }).forEach(function(c){
+    html += '<tr><td style="white-space:nowrap;">'+c.ref+'</td><td><span class="fy-badge">FY '+c.fy+'</span></td><td class="name">'+c.title+'</td></tr>';
+  });
+  document.getElementById('circularTable').innerHTML = html || '<tr><td colspan="3" class="name">No matches.</td></tr>';
+}
+document.getElementById('circularSearch').addEventListener('input', function(e){ renderCirculars(e.target.value); });
+
+function renderAutoPay(){
+  var regLabels=['Yes Bank','Axis Bank','ICICI Bank','SBI','HDFC Bank','BHIM','Others'];
+  var regData=[45.65,21.53,16.76,9.71,7.1,0.63,0.38];
+  new Chart(document.getElementById('regChart'), {type:'bar',data:{labels:regLabels,datasets:[{label:'Registrations (Mn)',data:regData,backgroundColor:'#3FC1A8',borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,scales:{x:{grid:{display:false}},y:{grid:{color:'rgba(255,255,255,0.06)'},title:{display:true,text:'Millions',font:{size:11}}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return c.raw+'M';}}}}}});
+  var execLabels=['SBI','Airtel PB','Bank of Baroda','India Post PB','Union Bank','PNB','Kotak','HDFC','Canara','Indian Bank'];
+  var execData=[518.33,178.2,167.35,136.56,135.28,129.03,121.9,113.7,98.97,80.84];
+  new Chart(document.getElementById('execChart'), {type:'bar',data:{labels:execLabels,datasets:[{label:'Executions (Mn)',data:execData,backgroundColor:'#F5A524',borderRadius:4}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,scales:{x:{grid:{color:'rgba(255,255,255,0.06)'},title:{display:true,text:'Millions',font:{size:11}}},y:{grid:{display:false}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return c.raw+'M';}}}}}});
+  window._regLabels=regLabels; window._regData=regData; window._execLabels=execLabels; window._execData=execData;
+}
+
+function renderAll(){
+  renderHero(); renderKPIs(); renderTrendChart(); renderTrendRaw();
+  renderTop4AndShare(); renderLeaderboard(); renderP2P(); renderCategories(); renderGeo();
+  renderQuarter(); renderQuarterRaw(); renderPremiumAndTicket(); renderHeatmap();
+  renderCirculars('');
+}
+renderAll();
+renderAutoPay();
+
+document.querySelectorAll('#metricToggle .toggle-btn').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    document.querySelectorAll('#metricToggle .toggle-btn').forEach(function(b){b.classList.remove('active');b.setAttribute('aria-selected','false');});
+    btn.classList.add('active'); btn.setAttribute('aria-selected','true');
+    metric = btn.dataset.metric;
+    renderHero(); renderKPIs(); renderTrendChart(); renderTop4AndShare(); renderLeaderboard(); renderCategories(); renderGeo(); renderQuarter();
+  });
+});
+
+document.querySelectorAll('[data-raw]').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    var panel = document.getElementById(btn.dataset.raw);
+    panel.classList.toggle('open');
+    btn.textContent = panel.classList.contains('open') ? 'Raw data ▴' : 'Raw data ▾';
+  });
+});
+
+document.querySelectorAll('[data-csv]').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    var key = btn.dataset.csv, rows=[];
+    if (key==='trend'){
+      rows.push(['Month','Volume (Mn)','MoM %','YoY %','Value (Cr)','MoM %','YoY %']);
+      for (var i=0;i<months.length;i++){ rows.push([months[i], mVol[i]||'', mom(mVol,i)||'', yoy(mVol,i)||'', mVal[i]||'', mom(mVal,i)||'', yoy(mVal,i)||'']); }
+    } else if (key==='leaderboard'){
+      rows.push(['Rank','App','Volume (Mn)','Value (Cr)','Avg ticket (Rs)','Share %']);
+      sortedApps().forEach(function(n,i){ rows.push([i+1,n,appData[n].vol[Q],appData[n].val[Q],appTicket(n,Q).toFixed(0), (metric==='volume'?appVolShare(n):appValShare(n)).toFixed(2)]); });
+    } else if (key==='category'){
+      rows.push(['Category','Volume (Mn)','Value (Cr)']);
+      (window._categories||[]).forEach(function(c){ rows.push([c.name,c.vol,c.val]); });
+    } else if (key==='geo'){
+      rows.push(['District','Volume Share %','Value Share %']);
+      (window._geo||[]).forEach(function(g){ rows.push([g.name,g.vol,g.val]); });
+    } else if (key==='quarter'){
+      rows.push(['App',"Dec'25 Vol(Mn)","Mar'26 Vol(Mn)","Jun'26 Vol(Mn)","Dec'25 Val(Cr)","Mar'26 Val(Cr)","Jun'26 Val(Cr)"]);
+      appNames.forEach(function(n){ var d=appData[n]; rows.push([n,d.vol[0],d.vol[1],d.vol[2],d.val[0],d.val[1],d.val[2]]); });
+    } else if (key==='ticket'){
+      rows.push(['App','Avg ticket size (Rs)','Premiumness index']);
+      (window._tOrder||[]).forEach(function(n,i){ rows.push([n, window._tData[i], (window._premData[window._premOrder.indexOf(n)])]); });
+    } else if (key==='seasonality'){
+      rows.push(['Year/Row'].concat(heatMonths));
+      (window._heatRows||[]).forEach(function(r){ rows.push([r.label].concat(r.data.map(function(v){return v==null?'':v.toFixed(1);}))); });
+    } else if (key==='circulars'){
+      rows.push(['Reference','FY','Title']);
+      circulars.forEach(function(c){ rows.push([c.ref,c.fy,c.title]); });
+    } else if (key==='autopayReg'){
+      rows.push(['PSP','Registrations (Mn)']);
+      window._regLabels.forEach(function(l,i){ rows.push([l, window._regData[i]]); });
+    } else if (key==='autopayExec'){
+      rows.push(['Bank','Executions (Mn)']);
+      window._execLabels.forEach(function(l,i){ rows.push([l, window._execData[i]]); });
+    }
+    downloadCSV('upi-pulse-'+key+'.csv', rows);
+  });
+});
+
+document.getElementById('downloadAllBtn').addEventListener('click', function(){
+  var rows = [['UPI Pulse — full data export'],['Source: NPCI Product & Ecosystem Statistics, pulled 26 Jul 2026'],[]];
+  rows.push(['MONTHLY TREND']); rows.push(['Month','Volume (Mn)','MoM %','YoY %','Value (Cr)','MoM %','YoY %']);
+  for (var i=0;i<months.length;i++){ rows.push([months[i], mVol[i]||'', mom(mVol,i)||'', yoy(mVol,i)||'', mVal[i]||'', mom(mVal,i)||'', yoy(mVal,i)||'']); }
+  rows.push([]); rows.push(['APP LEADERBOARD (Jun 26)']); rows.push(['App','Volume (Mn)','Value (Cr)','Avg ticket (Rs)']);
+  appNames.forEach(function(n){ rows.push([n, appData[n].vol[Q], appData[n].val[Q], appTicket(n,Q).toFixed(0)]); });
+  rows.push([]); rows.push(['CIRCULARS']); rows.push(['Reference','FY','Title']);
+  circulars.forEach(function(c){ rows.push([c.ref,c.fy,c.title]); });
+  downloadCSV('upi-pulse-full-data.csv', rows);
+});
+
+var toggleBtns = document.querySelectorAll('#viewToggle .toggle-btn');
+var viewUPI = document.getElementById('viewUPI');
+var viewAutopay = document.getElementById('viewAutopay');
+toggleBtns.forEach(function(btn){
+  btn.addEventListener('click', function(){
+    toggleBtns.forEach(function(b){ b.classList.remove('active'); b.setAttribute('aria-selected','false'); });
+    btn.classList.add('active'); btn.setAttribute('aria-selected','true');
+    if (btn.dataset.view === 'upi'){ viewUPI.style.display=''; viewAutopay.style.display='none'; }
+    else { viewUPI.style.display='none'; viewAutopay.style.display=''; }
+  });
+});
+</script>
+</body>
+</html>
