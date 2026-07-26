@@ -172,7 +172,7 @@ def circular_sort_key(r):
 circulars_raw.sort(key=circular_sort_key)
 circulars_count = len(circulars_raw)
 circulars_js = "[\n" + ",\n".join(
-    f'  {{ref:\'{r["Ref"]}\', fy:\'{r["FY"]}\', title:{json.dumps(r["Title"])}}}'
+    f'  {{ref:\'{r["Ref"]}\', fy:\'{r["FY"]}\', title:{json.dumps(r["Title"])}, pdf:{json.dumps(r.get("PDF URL"))}}}'
     for r in circulars_raw
 ) + "\n]"
 
