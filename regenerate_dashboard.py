@@ -153,13 +153,25 @@ for m in cat_months:
     cat_month_blocks.append(f"  [ {entries} ]")
 categoriesbymonth_js = "[\n" + ",\n".join(cat_month_blocks) + "\n]"
 
-# ---------------- Statewise (latest month, all rows) ----------------
-latest_geo_month = max(r["Month"] for r in statewise)
-geo_latest = sorted((r for r in statewise if r["Month"] == latest_geo_month), key=lambda r: -r["Volume (Mn)"])
-geo_js = "[\n" + ",\n".join(
-    f'    {{name:\'{r["District"].title()}\', vol:{js_num(r["Volume Share %"])}, val:{js_num(r["Value Share %"])}}}'
-    for r in geo_latest
-) + "\n  ]"
+# ---------------- Statewise (all 2026 months, district- or state-level per NPCI's actual publication) ----------------
+geo_months = sorted(set(r["Month"] for r in statewise if r["Month"].startswith("2026-")), key=month_key)
+if geo_months != app_months:
+    print(f"NOTE: Statewise months {geo_months} differ from App Stats months {app_months} — selector indices may not line up")
+
+geo_granularity = []
+geo_month_blocks = []
+for m in geo_months:
+    month_rows = sorted((r for r in statewise if r["Month"] == m), key=lambda r: -r["Volume (Mn)"])
+    # District == State (case-insensitive) signals these rows are state-level, not real districts
+    is_state_level = all(r["District"].strip().upper() == r["State"].strip().upper() for r in month_rows)
+    geo_granularity.append("State" if is_state_level else "District")
+    entries = ", ".join(
+        f'{{name:{json.dumps(r["District"].title())}, vol:{js_num(r["Volume Share %"])}, val:{js_num(r["Value Share %"])}}}'
+        for r in month_rows
+    )
+    geo_month_blocks.append(f"  [ {entries} ]")
+geo_granularity_js = "[" + ",".join(f"'{g}'" for g in geo_granularity) + "]"
+geo_js = "[\n" + ",\n".join(geo_month_blocks) + "\n]"
 
 # ---------------- Circulars (all rows, newest first) ----------------
 def circular_sort_key(r):
@@ -212,7 +224,8 @@ html = replace_var(html, "monthTotalVal", monthtotalval_js, "[", "]")
 html = replace_var(html, "appData", appdata_js, "{", "}")
 html = replace_var(html, "p2pData", p2pdata_js, "[", "]")
 html = replace_var(html, "categoriesByMonth", categoriesbymonth_js, "[", "]")
-html = replace_var(html, "geo", geo_js, "[", "]")
+html = replace_var(html, "geoGranularity", geo_granularity_js, "[", "]")
+html = replace_var(html, "geographyByMonth", geo_js, "[", "]")
 html = replace_var(html, "circulars", circulars_js, "[", "]")
 html = re.sub(r"var\s+regLabels\s*=\s*\[.*?\];", f"var regLabels={reg_labels_js};", html, count=1, flags=re.DOTALL)
 html = re.sub(r"var\s+regData\s*=\s*\[.*?\];", f"var regData={reg_data_js};", html, count=1, flags=re.DOTALL)
