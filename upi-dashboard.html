@@ -159,6 +159,7 @@
           <div><p class="section-note" style="text-align:center;margin:0 0 6px;">By value</p><div style="position:relative;height:160px;"><canvas id="p2pValChart"></canvas></div></div>
         </div>
         <div class="legend"><span><i style="background:#F5A524"></i>P2M</span><span><i style="background:#3FC1A8"></i>P2P</span></div>
+        <div class="legend" id="p2pTicketRow" style="margin-top:6px;"></div>
       </div>
       <div class="card">
         <div class="section-head"><p class="section-title">Top merchant categories</p><div class="section-actions"><p class="section-note" id="categoriesNote">June 2026</p><button class="mini-btn" data-csv="category">CSV</button></div></div>
@@ -169,12 +170,12 @@
 
   <div class="section">
     <div class="section-head">
-      <p class="section-title">Geography — top districts nationally</p>
-      <div class="section-actions"><p class="section-note">June 2026 · NPCI reports at district level</p><button class="mini-btn" data-csv="geo">Download CSV</button></div>
+      <p class="section-title" id="geoTitle">Geography — top districts nationally</p>
+      <div class="section-actions"><p class="section-note" id="geoNote">June 2026 · NPCI reports at district level</p><button class="mini-btn" data-csv="geo">Download CSV</button></div>
     </div>
     <div class="card">
-      <table><thead><tr><th>District</th><th>Volume share</th><th>Value share</th></tr></thead><tbody id="geoTable"></tbody></table>
-      <p class="section-note" style="margin-top:16px;">All ten highest-volume districts nationally sit in Maharashtra — Mumbai's metro belt alone accounts for 6.5% of all UPI volume.</p>
+      <table><thead><tr><th id="geoColHead">District</th><th>Volume share</th><th>Value share</th></tr></thead><tbody id="geoTable"></tbody></table>
+      <p class="section-note" id="geoFootnote" style="margin-top:16px;">All ten highest-volume districts nationally sit in Maharashtra — Mumbai's metro belt alone accounts for 6.5% of all UPI volume.</p>
     </div>
   </div>
 
@@ -185,7 +186,7 @@
   </div>
 
   <div class="section">
-    <div class="section-head"><p class="section-title">Average ticket size</p><div class="section-actions"><p class="section-note">June 2026, ₹ per transaction</p><button class="mini-btn" data-csv="ticket">CSV</button></div></div>
+    <div class="section-head"><p class="section-title">Average ticket size</p><div class="section-actions"><p class="section-note" id="ticketNote">June 2026, ₹ per transaction</p><button class="mini-btn" data-csv="ticket">CSV</button></div></div>
     <div class="card"><div style="position:relative;height:240px;"><canvas id="ticketChart" role="img" aria-label="Bar chart of average ticket size by app"></canvas></div></div>
   </div>
 
@@ -208,7 +209,7 @@
       <a href="https://www.npci.org.in/product/ecosystem-statistics/upi" target="_blank" rel="noopener">NPCI — UPI Ecosystem Statistics</a>
       <a href="https://www.npci.org.in/circulars/upi" target="_blank" rel="noopener">NPCI — UPI Circulars & Notifications</a>
     </div>
-    <p class="disclaimer">All figures pulled directly from NPCI's official statistics pages on 26 Jul 2026. App leaderboard, P2P/P2M split, and merchant categories are month-selectable for Jan–Jun 2026 via the month picker above; average ticket size always reflects the latest available month (June 2026) regardless of that selector. Ticket size is computed by this dashboard from NPCI's volume/value figures, not published directly by NPCI. April and May 2024/2025 are absent from NPCI's monthly series as published. NPCI states it makes no warranty on completeness or continued validity of this data.</p>
+    <p class="disclaimer">All figures pulled directly from NPCI's official statistics pages on 26 Jul 2026. App leaderboard, P2P/P2M split, merchant categories, geography, and average ticket size are all month-selectable for Jan–Jun 2026 via the month picker above. NPCI only published a district-level geography breakdown for Mar–Jun 2026; Jan–Feb show state-level figures instead since that's all NPCI published for those months. Ticket size (overall and by P2P/P2M) is computed by this dashboard from NPCI's volume/value figures, not published directly by NPCI. April and May 2024/2025 are absent from NPCI's monthly series as published. NPCI states it makes no warranty on completeness or continued validity of this data.</p>
   </div>
 
   </div>
@@ -377,6 +378,11 @@ function renderP2P(){
     p2pCharts[id] = new Chart(document.getElementById(id), { type:'doughnut', data:{labels:['P2M','P2P'],datasets:[{data:data,backgroundColor:['#F5A524','#3FC1A8'],borderColor:'#111C2B',borderWidth:2}]},
       options:{responsive:true,maintainAspectRatio:false,cutout:'58%',plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return c.label+': '+c.raw+'%';}}}}} });
   });
+  var p2pTicket = d.p2pVal/d.p2pVol*10, p2mTicket = d.p2mVal/d.p2mVol*10;
+  document.getElementById('p2pTicketRow').innerHTML =
+    '<span><i style="background:#3FC1A8"></i>P2P avg ticket: ₹'+p2pTicket.toFixed(0)+'</span>' +
+    '<span><i style="background:#F5A524"></i>P2M avg ticket: ₹'+p2mTicket.toFixed(0)+'</span>';
+  window._p2pTicket = p2pTicket; window._p2mTicket = p2mTicket;
 }
 
 // ---------- RAW DATA: top-5 merchant categories by month, 2026 ----------
@@ -397,19 +403,20 @@ function renderCategories(){
   window._categories = categories;
 }
 
+// ---------- RAW DATA: geography by month, 2026 ----------
+// NPCI only published district-level breakdowns for Mar-Jun 2026; Jan-Feb are state-level only.
+var geoGranularity = ['State','State','District','District','District','District'];
+var geographyByMonth = [
+  [ {name:'Maharashtra', vol:10.46, val:9.42}, {name:'Karnataka', vol:5.37, val:5.81}, {name:'Uttar Pradesh', vol:5.21, val:5.43}, {name:'Telangana', vol:4.01, val:4.91}, {name:'Tamil Nadu', vol:3.96, val:4.68}, {name:'Andhra Pradesh', vol:2.89, val:3.81}, {name:'Gujarat', vol:2.62, val:3.12}, {name:'Rajasthan', vol:2.58, val:3.02}, {name:'Delhi', vol:2.37, val:2.41}, {name:'West Bengal', vol:2.27, val:2.60} ],
+  [ {name:'Maharashtra', vol:10.09, val:9.20}, {name:'Karnataka', vol:5.35, val:5.79}, {name:'Uttar Pradesh', vol:5.31, val:5.59}, {name:'Tamil Nadu', vol:4.06, val:4.88}, {name:'Telangana', vol:4.06, val:4.91}, {name:'Andhra Pradesh', vol:2.81, val:3.67}, {name:'Gujarat', vol:2.58, val:2.99}, {name:'Rajasthan', vol:2.57, val:2.99}, {name:'Delhi', vol:2.38, val:2.43}, {name:'West Bengal', vol:2.20, val:2.57} ],
+  [ {name:'Bengaluru (Urban)', vol:2.97, val:3.15}, {name:'Mumbai Suburban', vol:2.56, val:2.00}, {name:'Pune', vol:1.92, val:1.72}, {name:'Thane', vol:1.10, val:1.01}, {name:'Mumbai', vol:1.00, val:0.86}, {name:'Ranga Reddy', vol:0.93, val:1.11}, {name:'Chennai', vol:0.93, val:1.03}, {name:'Medchal-Malkajgiri', vol:0.89, val:1.03}, {name:'Hyderabad', vol:0.75, val:0.84}, {name:'Gurugram', vol:0.74, val:0.66} ],
+  [ {name:'Bengaluru (Urban)', vol:2.90, val:3.07}, {name:'Mumbai Suburban', vol:2.52, val:1.92}, {name:'Pune', vol:1.88, val:1.68}, {name:'Mumbai', vol:1.08, val:0.85}, {name:'Thane', vol:1.07, val:0.99}, {name:'Ranga Reddy', vol:0.94, val:1.12}, {name:'Chennai', vol:0.89, val:0.99}, {name:'Medchal-Malkajgiri', vol:0.89, val:1.02}, {name:'Gautam Buddha Nagar', vol:0.78, val:0.62}, {name:'Gurugram', vol:0.77, val:0.68} ],
+  [ {name:'Bengaluru (Urban)', vol:2.89, val:3.05}, {name:'Mumbai Suburban', vol:2.46, val:1.97}, {name:'Pune', vol:1.82, val:1.64}, {name:'Thane', vol:1.03, val:0.96}, {name:'Mumbai', vol:1.01, val:0.80}, {name:'Ranga Reddy', vol:0.91, val:1.08}, {name:'Chennai', vol:0.89, val:0.98}, {name:'Medchal-Malkajgiri', vol:0.84, val:0.98}, {name:'Gautam Buddha Nagar', vol:0.78, val:0.61}, {name:'Gurugram', vol:0.76, val:0.67} ],
+  [ {name:'Mumbai Suburban', vol:2.51, val:2.02}, {name:'Pune', vol:1.84, val:1.69}, {name:'Thane', vol:1.07, val:0.99}, {name:'Mumbai', vol:1.04, val:0.81}, {name:'Raigad', vol:0.32, val:0.3}, {name:'Nagpur', vol:0.3, val:0.33}, {name:'Nashik', vol:0.29, val:0.33}, {name:'Palghar', vol:0.26, val:0.24}, {name:'Chhatrapati Sambhaji Nagar', vol:0.22, val:0.23}, {name:'Solapur', vol:0.19, val:0.24} ]
+];
 function renderGeo(){
-  var geo = [
-    {name:'Mumbai Suburban', vol:2.51, val:2.02},
-    {name:'Pune', vol:1.84, val:1.69},
-    {name:'Thane', vol:1.07, val:0.99},
-    {name:'Mumbai', vol:1.04, val:0.81},
-    {name:'Raigad', vol:0.32, val:0.3},
-    {name:'Nagpur', vol:0.3, val:0.33},
-    {name:'Nashik', vol:0.29, val:0.33},
-    {name:'Palghar', vol:0.26, val:0.24},
-    {name:'Chhatrapati Sambhaji Nagar', vol:0.22, val:0.23},
-    {name:'Solapur', vol:0.19, val:0.24}
-  ];
+  var granularity = geoGranularity[selectedIdx];
+  var geo = geographyByMonth[selectedIdx].slice();
   geo.sort(function(a,b){ return metric==='volume' ? b.vol-a.vol : b.val-a.val; });
   var maxV = Math.max.apply(null, geo.map(function(g){return metric==='volume'?g.vol:g.val;}));
   var html='';
@@ -419,6 +426,12 @@ function renderGeo(){
     html += '<tr><td class="name">'+g.name+'</td><td><div class="bar-cell"><div class="bar-track"><div class="bar-fill" style="width:'+(metric==='volume'?pct:0)+'%"></div></div><span>'+g.vol+'%</span></div></td><td><div class="bar-cell"><div class="bar-track"><div class="bar-fill" style="width:'+(metric==='value'?pct:0)+'%;background:#3FC1A8"></div></div><span>'+g.val+'%</span></div></td></tr>';
   });
   document.getElementById('geoTable').innerHTML = html;
+  document.getElementById('geoColHead').textContent = granularity;
+  document.getElementById('geoTitle').textContent = 'Geography — top ' + (granularity==='District'?'districts':'states') + ' nationally';
+  document.getElementById('geoNote').textContent = months2026Full[selectedIdx] + ' · NPCI reports at ' + granularity.toLowerCase() + ' level' + (granularity==='State' ? ' for this month' : '');
+  document.getElementById('geoFootnote').textContent = granularity==='District'
+    ? 'District-level breakdown as published by NPCI for this month.'
+    : 'NPCI did not publish a district-level breakdown for this month — showing state-level figures instead.';
   window._geo = geo;
 }
 
@@ -444,15 +457,18 @@ function renderQuarterRaw(){
   document.getElementById('quarterRaw').innerHTML = html;
 }
 
+var ticketChart;
 function renderTicket(){
-  var tOrder = appNames.slice().sort(function(a,b){ return appTicket(b,latestIdx)-appTicket(a,latestIdx); });
-  var tData = tOrder.map(function(n){ return +appTicket(n,latestIdx).toFixed(0); });
-  new Chart(document.getElementById('ticketChart'), { type:'bar',
+  var tOrder = appNames.slice().sort(function(a,b){ return appTicket(b,selectedIdx)-appTicket(a,selectedIdx); });
+  var tData = tOrder.map(function(n){ return +appTicket(n,selectedIdx).toFixed(0); });
+  if (ticketChart) ticketChart.destroy();
+  ticketChart = new Chart(document.getElementById('ticketChart'), { type:'bar',
     data:{ labels:tOrder, datasets:[{label:'₹ per txn', data:tData, backgroundColor:'#F5A524', borderRadius:4}] },
     options:{ responsive:true, maintainAspectRatio:false,
       scales:{x:{grid:{display:false}},y:{grid:{color:'rgba(255,255,255,0.06)'},title:{display:true,text:'₹ per transaction',font:{size:11}}}},
       plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return '₹'+c.raw.toLocaleString('en-IN');}}}} } });
   window._tOrder=tOrder; window._tData=tData;
+  document.getElementById('ticketNote').textContent = months2026Full[selectedIdx] + ', ₹ per transaction';
 }
 
 var circulars = [
@@ -538,7 +554,7 @@ var monthSelectEl = document.getElementById('monthSelect');
 monthSelectEl.innerHTML = months2026Full.map(function(m,i){ return '<option value="'+i+'"'+(i===selectedIdx?' selected':'')+'>'+m+'</option>'; }).join('');
 monthSelectEl.addEventListener('change', function(){
   selectedIdx = +this.value;
-  renderLeaderboard(); renderP2P(); renderCategories();
+  renderLeaderboard(); renderP2P(); renderCategories(); renderGeo(); renderTicket();
   updateMonthLabels();
 });
 updateMonthLabels();
@@ -573,7 +589,7 @@ document.querySelectorAll('[data-csv]').forEach(function(btn){
       rows.push(['Category','Volume (Mn)','Value (Cr)']);
       (window._categories||[]).forEach(function(c){ rows.push([c.name,c.vol,c.val]); });
     } else if (key==='geo'){
-      rows.push(['District','Volume Share %','Value Share %']);
+      rows.push([geoGranularity[selectedIdx],'Volume Share %','Value Share %']);
       (window._geo||[]).forEach(function(g){ rows.push([g.name,g.vol,g.val]); });
     } else if (key==='quarter'){
       rows.push(['App'].concat(months2026.map(function(m){return m+' Vol(Mn)';})).concat(months2026.map(function(m){return m+' Val(Cr)';})));
@@ -581,6 +597,8 @@ document.querySelectorAll('[data-csv]').forEach(function(btn){
     } else if (key==='ticket'){
       rows.push(['App','Avg ticket size (Rs)']);
       (window._tOrder||[]).forEach(function(n,i){ rows.push([n, window._tData[i]]); });
+      rows.push([]); rows.push(['P2P avg ticket (Rs)', window._p2pTicket?window._p2pTicket.toFixed(0):'']);
+      rows.push(['P2M avg ticket (Rs)', window._p2mTicket?window._p2mTicket.toFixed(0):'']);
     } else if (key==='circulars'){
       rows.push(['Reference','FY','Title','PDF URL']);
       circulars.forEach(function(c){ rows.push([c.ref,c.fy,c.title,c.pdf||'']); });
