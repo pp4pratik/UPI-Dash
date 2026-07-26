@@ -44,6 +44,10 @@ def iso_to_long_label(iso_date):
     y, m, d = iso_date.split("-")
     return f"{MON_FULL[MON_NAMES[int(m)-1]]} {y}"
 
+def iso_to_apos_label(iso_date):
+    y, m, d = iso_date.split("-")
+    return f"{MON_NAMES[int(m)-1]}'{y[2:]}"
+
 def month_key(iso_date):
     y, m, _ = iso_date.split("-")
     return int(y) * 12 + int(m)
@@ -97,10 +101,14 @@ months_js = "[" + ",".join(f"'{l}'" for l in full_labels) + "]"
 mVol_js = "[" + ",".join(js_num(v) for v in mVol) + "]"
 mVal_js = "[" + ",".join(js_num(v) for v in mVal) + "]"
 
-# ---------------- App Stats (last 3 distinct months) ----------------
-app_months = sorted(set(r["Month"] for r in app_stats), key=month_key)[-3:]
-quarters_short = [iso_to_label(m).replace(" ", " ") for m in app_months]  # e.g. "Dec 25"
-quarters_apos = [l[:3] + "'" + l[-2:] for l in quarters_short]            # e.g. "Dec'25"
+# ---------------- App Stats, P2P/P2M, Merchant Categories: month-selectable, 2026 only (for now) ----------------
+app_months = sorted(set(r["Month"] for r in app_stats if r["Month"].startswith("2026-")), key=month_key)
+months2026_short = [iso_to_apos_label(m) for m in app_months]      # "Jan'26"
+months2026_full = [iso_to_long_label(m) for m in app_months]       # "January 2026"
+
+trend_by_iso = {r["Month"]: r for r in trend}
+monthTotalVol = [trend_by_iso[m]["Total Volume (Mn)"] for m in app_months]
+monthTotalVal = [trend_by_iso[m]["Total Value (Cr)"] for m in app_months]
 
 apps = sorted(set(r["App Name"] for r in app_stats),
               key=lambda a: -sum(r["Volume (Mn)"] for r in app_stats if r["App Name"] == a and r["Month"] == app_months[-1]))
@@ -113,20 +121,37 @@ for a in apps:
         val.append(match["Value (Cr)"] if match else 0)
     app_data[a] = {"vol": vol, "val": val}
 
-quarters_js = "[" + ",".join(f'"{q}"' for q in quarters_apos) + "]"
+months2026_js = "[" + ",".join(f'"{m}"' for m in months2026_short) + "]"
+months2026full_js = "[" + ",".join(f'"{m}"' for m in months2026_full) + "]"
+monthtotalvol_js = "[" + ",".join(js_num(v) for v in monthTotalVol) + "]"
+monthtotalval_js = "[" + ",".join(js_num(v) for v in monthTotalVal) + "]"
 appdata_js = "{\n" + ",\n".join(
     f'  "{a}":{{vol:[{",".join(js_num(v) for v in d["vol"])}], val:[{",".join(js_num(v) for v in d["val"])}]}}'
     for a, d in app_data.items()
 ) + "\n}"
 
-# ---------------- Merchant Categories (top 5 by volume, latest month) ----------------
-latest_cat_month = max(r["Month"] for r in categories)
-cat_latest = [r for r in categories if r["Month"] == latest_cat_month and r["Description"] != "Others"]
-cat_top5 = sorted(cat_latest, key=lambda r: -r["Volume (Mn)"])[:5]
-categories_js = "[\n" + ",\n".join(
-    f'    {{name:\'{r["Description"]}\', vol:{js_num(r["Volume (Mn)"])}, val:{js_num(r["Value (Cr)"])}}}'
-    for r in cat_top5
-) + "\n  ]"
+p2p_months = sorted(set(r["Month"] for r in p2p_p2m if r["Month"].startswith("2026-")), key=month_key)
+p2p_by_month = {r["Month"]: r for r in p2p_p2m}
+if p2p_months != app_months:
+    print(f"NOTE: P2P P2M months {p2p_months} differ from App Stats months {app_months} — selector indices may not line up")
+p2pdata_js = "[\n" + ",\n".join(
+    f'  {{p2pVol:{js_num(p2p_by_month[m]["P2P Volume (Mn)"])}, p2pVal:{js_num(p2p_by_month[m]["P2P Value (Cr)"])}, p2mVol:{js_num(p2p_by_month[m]["P2M Volume (Mn)"])}, p2mVal:{js_num(p2p_by_month[m]["P2M Value (Cr)"])}}}'
+    for m in p2p_months
+) + "\n]"
+
+cat_months = sorted(set(r["Month"] for r in categories if r["Month"].startswith("2026-")), key=month_key)
+if cat_months != app_months:
+    print(f"NOTE: Merchant Categories months {cat_months} differ from App Stats months {app_months} — selector indices may not line up")
+cat_month_blocks = []
+for m in cat_months:
+    month_cats = [r for r in categories if r["Month"] == m and r["Description"] != "Others"]
+    top5 = sorted(month_cats, key=lambda r: -r["Volume (Mn)"])[:5]
+    entries = ", ".join(
+        f'{{name:{json.dumps(r["Description"])}, vol:{js_num(r["Volume (Mn)"])}, val:{js_num(r["Value (Cr)"])}}}'
+        for r in top5
+    )
+    cat_month_blocks.append(f"  [ {entries} ]")
+categoriesbymonth_js = "[\n" + ",\n".join(cat_month_blocks) + "\n]"
 
 # ---------------- Statewise (latest month, all rows) ----------------
 latest_geo_month = max(r["Month"] for r in statewise)
@@ -180,9 +205,13 @@ html = replace_var(html, "months", months_js, "[", "]")
 html = replace_var(html, "mVol", mVol_js, "[", "]")
 html = replace_var(html, "mVal", mVal_js, "[", "]")
 html = re.sub(r'var\s+banksLive\s*=\s*\d+;', f'var banksLive = {banks_live};', html, count=1)
-html = replace_var(html, "quarters", quarters_js, "[", "]")
+html = replace_var(html, "months2026", months2026_js, "[", "]")
+html = replace_var(html, "months2026Full", months2026full_js, "[", "]")
+html = replace_var(html, "monthTotalVol", monthtotalvol_js, "[", "]")
+html = replace_var(html, "monthTotalVal", monthtotalval_js, "[", "]")
 html = replace_var(html, "appData", appdata_js, "{", "}")
-html = replace_var(html, "categories", categories_js, "[", "]")
+html = replace_var(html, "p2pData", p2pdata_js, "[", "]")
+html = replace_var(html, "categoriesByMonth", categoriesbymonth_js, "[", "]")
 html = replace_var(html, "geo", geo_js, "[", "]")
 html = replace_var(html, "circulars", circulars_js, "[", "]")
 html = re.sub(r"var\s+regLabels\s*=\s*\[.*?\];", f"var regLabels={reg_labels_js};", html, count=1, flags=re.DOTALL)
@@ -202,9 +231,7 @@ replacements = [
     ("May 2026", ap_reg_month_long),
     ("Jun 2023 – Jun 2026", f"{first_month_short} – {last_month_short}"),
     ("June 2023 to June 2026", f"{first_month_long} to {last_month_long}"),
-    ("Dec'25 / Mar'26 / Jun'26", " / ".join(quarters_apos)),
-    ("Dec 2025, Mar 2026 and Jun 2026", ", ".join(iso_to_long_label(m) for m in app_months[:-1]) + f" and {iso_to_long_label(app_months[-1])}"),
-    ("Jun 2026)", f"{last_month_short})"),
+    ("Jan'26 – Jun'26", f"{months2026_short[0]} – {months2026_short[-1]}"),
     ("26 Jul 2026", today_str),
 ]
 for old, new in replacements:
@@ -213,31 +240,9 @@ for old, new in replacements:
         print(f"NOTE: literal '{old}' not found (0 occurrences) — skipped")
     html = html.replace(old, new)
 
-# Quarter labels used inside single-quoted JS strings need the apostrophe escaped;
-# double-quoted JS strings and plain HTML text don't. Handle each context explicitly.
-escaped_quarters = [q.replace("'", "\\'") for q in quarters_apos]
-for old, new in [
-    ("Dec\\'25 Vol(Mn)", f"{escaped_quarters[0]} Vol(Mn)"),
-    ("Mar\\'26 Vol(Mn)", f"{escaped_quarters[1]} Vol(Mn)"),
-    ("Jun\\'26 Vol(Mn)", f"{escaped_quarters[2]} Vol(Mn)"),
-    ("Dec\\'25 Val(Cr)", f"{escaped_quarters[0]} Val(Cr)"),
-    ("Mar\\'26 Val(Cr)", f"{escaped_quarters[1]} Val(Cr)"),
-    ("Jun\\'26 Val(Cr)", f"{escaped_quarters[2]} Val(Cr)"),
-]:
-    if old not in html:
-        print(f"NOTE: literal '{old}' not found (0 occurrences) — skipped")
-    html = html.replace(old, new)
-for old, new in [
-    ('"Dec\'25 Vol(Mn)"', f'"{quarters_apos[0]} Vol(Mn)"'),
-    ('"Mar\'26 Vol(Mn)"', f'"{quarters_apos[1]} Vol(Mn)"'),
-    ('"Jun\'26 Vol(Mn)"', f'"{quarters_apos[2]} Vol(Mn)"'),
-    ('"Dec\'25 Val(Cr)"', f'"{quarters_apos[0]} Val(Cr)"'),
-    ('"Mar\'26 Val(Cr)"', f'"{quarters_apos[1]} Val(Cr)"'),
-    ('"Jun\'26 Val(Cr)"', f'"{quarters_apos[2]} Val(Cr)"'),
-]:
-    if old not in html:
-        print(f"NOTE: literal '{old}' not found (0 occurrences) — skipped")
-    html = html.replace(old, new)
+# Note: "Top apps this month" / "Leaderboard" / "P2P split" / "Categories" section notes,
+# and the month-select <option> list, are populated live by JS (updateMonthLabels(),
+# monthSelectEl.innerHTML) from months2026Full — no HTML patching needed for those.
 
 if html == original_html:
     print("WARNING: no changes were made to the file at all")
