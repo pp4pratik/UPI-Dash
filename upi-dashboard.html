@@ -125,7 +125,6 @@
 
   <div id="viewUPI">
 
-  <div class="kpi-strip" id="kpiStrip"></div>
 
   <div class="section">
     <div class="section-head">
@@ -352,22 +351,6 @@ function sortedApps(){
 var appColors = {"PhonePe":'#F5A524',"Google Pay":'#5B8DEF',"Paytm":'#3FC1A8',"Navi":'#E8654F',"super.money":'#9A7FD1',"BHIM":'#647085',"FamApp":'#5FD97A',"WhatsApp":'#7DD3E0',"CRED":'#E8B4D8',"Axis Bank Apps":'#C9A876',"Others":'#3A4759'};
 
 var trendChart, shareChart, quarterChart;
-
-function renderKPIs(){
-  var i = months.length-1;
-  var topCatVol=3739.59, topCatVal=79705.02;
-  var html = '';
-  if (metric==='volume'){
-    html += '<div class="kpi"><p class="kpi-label">Total volume</p><p class="kpi-value">'+(mVol[i]/1000).toFixed(2)+'B</p><p class="kpi-sub '+(mom(mVol,i)<0?'down':'up')+'">'+fmtPct(mom(mVol,i))+' MoM</p></div>';
-    html += '<div class="kpi"><p class="kpi-label">Volume, 1yr ago</p><p class="kpi-value">'+(mVol[i-12]/1000).toFixed(2)+'B</p><p class="kpi-sub up">'+fmtPct(yoy(mVol,i))+' YoY</p></div>';
-    html += '<div class="kpi"><p class="kpi-label">Top category (volume)</p><p class="kpi-value" style="font-size:16px;">Groceries & supermarkets</p><p class="kpi-sub">'+(topCatVol/1000).toFixed(2)+'B txns · '+(topCatVol/mVol[i]*100).toFixed(1)+'% of volume</p></div>';
-  } else {
-    html += '<div class="kpi"><p class="kpi-label">Total value</p><p class="kpi-value">₹'+(mVal[i]/100000).toFixed(2)+'L Cr</p><p class="kpi-sub '+(mom(mVal,i)<0?'down':'up')+'">'+fmtPct(mom(mVal,i))+' MoM</p></div>';
-    html += '<div class="kpi"><p class="kpi-label">Value, 1yr ago</p><p class="kpi-value">₹'+(mVal[i-12]/100000).toFixed(2)+'L Cr</p><p class="kpi-sub up">'+fmtPct(yoy(mVal,i))+' YoY</p></div>';
-    html += '<div class="kpi"><p class="kpi-label">Top category (value)</p><p class="kpi-value" style="font-size:16px;">Service stations</p><p class="kpi-sub">₹47,183.84 Cr · '+(47183.84/(mVal[i]/100)*100).toFixed(1)+'% of value</p></div>';
-  }
-  document.getElementById('kpiStrip').innerHTML = html;
-}
 
 function renderTrendChart(){
   var ctx = document.getElementById('trendChart');
@@ -637,7 +620,7 @@ function renderAutoPay(){
 }
 
 function renderAll(){
-  renderKPIs(); renderTrendChart(); renderTrendRaw();
+  renderTrendChart(); renderTrendRaw();
   renderTop4AndShare(); renderLeaderboard(); renderP2P(); renderCategories(); renderGeo();
   renderQuarter(); renderQuarterRaw(); renderPremiumAndTicket(); renderHeatmap();
   renderCirculars('');
@@ -667,7 +650,7 @@ document.querySelectorAll('#metricToggle .toggle-btn').forEach(function(btn){
     document.querySelectorAll('#metricToggle .toggle-btn').forEach(function(b){b.classList.remove('active');b.setAttribute('aria-selected','false');});
     btn.classList.add('active'); btn.setAttribute('aria-selected','true');
     metric = btn.dataset.metric;
-    renderKPIs(); renderTrendChart(); renderTop4AndShare(); renderLeaderboard(); renderCategories(); renderGeo(); renderQuarter();
+    renderTrendChart(); renderTop4AndShare(); renderLeaderboard(); renderCategories(); renderGeo(); renderQuarter();
   });
 });
 
