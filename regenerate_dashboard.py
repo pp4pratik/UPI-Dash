@@ -101,14 +101,29 @@ months_js = "[" + ",".join(f"'{l}'" for l in full_labels) + "]"
 mVol_js = "[" + ",".join(js_num(v) for v in mVol) + "]"
 mVal_js = "[" + ",".join(js_num(v) for v in mVal) + "]"
 
-# ---------------- App Stats, P2P/P2M, Merchant Categories: month-selectable, 2026 only (for now) ----------------
-app_months = sorted(set(r["Month"] for r in app_stats if r["Month"].startswith("2026-")), key=month_key)
-months2026_short = [iso_to_apos_label(m) for m in app_months]      # "Jan'26"
-months2026_full = [iso_to_long_label(m) for m in app_months]       # "January 2026"
+# ---------------- App Stats, P2P/P2M, Merchant Categories: month-selectable, Jan 2025 - Jun 2026 ----------------
+SELECTOR_YEARS = ("2025-", "2026-")
+app_months = sorted(set(r["Month"] for r in app_stats if r["Month"].startswith(SELECTOR_YEARS)), key=month_key)
+all_months_short = [iso_to_apos_label(m) for m in app_months]      # "Jan'25"
+all_months_full = [iso_to_long_label(m) for m in app_months]       # "January 2025"
 
 trend_by_iso = {r["Month"]: r for r in trend}
-monthTotalVol = [trend_by_iso[m]["Total Volume (Mn)"] for m in app_months]
-monthTotalVal = [trend_by_iso[m]["Total Value (Cr)"] for m in app_months]
+# P2P Volume + P2M Volume == Total Volume exactly (verified against months where both exist),
+# so use it as a fallback for months NPCI never published an aggregate total for (e.g. Apr/May 2025).
+p2p_totals_by_iso = {r["Month"]: (r["P2P Volume (Mn)"] + r["P2M Volume (Mn)"], r["P2P Value (Cr)"] + r["P2M Value (Cr)"]) for r in p2p_p2m}
+
+def total_vol(m):
+    if m in trend_by_iso:
+        return trend_by_iso[m]["Total Volume (Mn)"]
+    return p2p_totals_by_iso[m][0]
+
+def total_val(m):
+    if m in trend_by_iso:
+        return trend_by_iso[m]["Total Value (Cr)"]
+    return p2p_totals_by_iso[m][1]
+
+monthTotalVol = [total_vol(m) for m in app_months]
+monthTotalVal = [total_val(m) for m in app_months]
 
 apps = sorted(set(r["App Name"] for r in app_stats),
               key=lambda a: -sum(r["Volume (Mn)"] for r in app_stats if r["App Name"] == a and r["Month"] == app_months[-1]))
@@ -121,8 +136,8 @@ for a in apps:
         val.append(match["Value (Cr)"] if match else 0)
     app_data[a] = {"vol": vol, "val": val}
 
-months2026_js = "[" + ",".join(f'"{m}"' for m in months2026_short) + "]"
-months2026full_js = "[" + ",".join(f'"{m}"' for m in months2026_full) + "]"
+allmonths_js = "[" + ",".join(f'"{m}"' for m in all_months_short) + "]"
+allmonthsfull_js = "[" + ",".join(f'"{m}"' for m in all_months_full) + "]"
 monthtotalvol_js = "[" + ",".join(js_num(v) for v in monthTotalVol) + "]"
 monthtotalval_js = "[" + ",".join(js_num(v) for v in monthTotalVal) + "]"
 appdata_js = "{\n" + ",\n".join(
@@ -130,7 +145,7 @@ appdata_js = "{\n" + ",\n".join(
     for a, d in app_data.items()
 ) + "\n}"
 
-p2p_months = sorted(set(r["Month"] for r in p2p_p2m if r["Month"].startswith("2026-")), key=month_key)
+p2p_months = sorted(set(r["Month"] for r in p2p_p2m if r["Month"].startswith(SELECTOR_YEARS)), key=month_key)
 p2p_by_month = {r["Month"]: r for r in p2p_p2m}
 if p2p_months != app_months:
     print(f"NOTE: P2P P2M months {p2p_months} differ from App Stats months {app_months} — selector indices may not line up")
@@ -139,7 +154,7 @@ p2pdata_js = "[\n" + ",\n".join(
     for m in p2p_months
 ) + "\n]"
 
-cat_months = sorted(set(r["Month"] for r in categories if r["Month"].startswith("2026-")), key=month_key)
+cat_months = sorted(set(r["Month"] for r in categories if r["Month"].startswith(SELECTOR_YEARS)), key=month_key)
 if cat_months != app_months:
     print(f"NOTE: Merchant Categories months {cat_months} differ from App Stats months {app_months} — selector indices may not line up")
 cat_month_blocks = []
@@ -153,8 +168,8 @@ for m in cat_months:
     cat_month_blocks.append(f"  [ {entries} ]")
 categoriesbymonth_js = "[\n" + ",\n".join(cat_month_blocks) + "\n]"
 
-# ---------------- Statewise (all 2026 months, district- or state-level per NPCI's actual publication) ----------------
-geo_months = sorted(set(r["Month"] for r in statewise if r["Month"].startswith("2026-")), key=month_key)
+# ---------------- Statewise (Jan 2025 - Jun 2026, district- or state-level per NPCI's actual publication) ----------------
+geo_months = sorted(set(r["Month"] for r in statewise if r["Month"].startswith(SELECTOR_YEARS)), key=month_key)
 if geo_months != app_months:
     print(f"NOTE: Statewise months {geo_months} differ from App Stats months {app_months} — selector indices may not line up")
 
@@ -217,8 +232,8 @@ html = replace_var(html, "months", months_js, "[", "]")
 html = replace_var(html, "mVol", mVol_js, "[", "]")
 html = replace_var(html, "mVal", mVal_js, "[", "]")
 html = re.sub(r'var\s+banksLive\s*=\s*\d+;', f'var banksLive = {banks_live};', html, count=1)
-html = replace_var(html, "months2026", months2026_js, "[", "]")
-html = replace_var(html, "months2026Full", months2026full_js, "[", "]")
+html = replace_var(html, "allMonths", allmonths_js, "[", "]")
+html = replace_var(html, "allMonthsFull", allmonthsfull_js, "[", "]")
 html = replace_var(html, "monthTotalVol", monthtotalvol_js, "[", "]")
 html = replace_var(html, "monthTotalVal", monthtotalval_js, "[", "]")
 html = replace_var(html, "appData", appdata_js, "{", "}")
@@ -244,7 +259,7 @@ replacements = [
     ("May 2026", ap_reg_month_long),
     ("Jun 2023 – Jun 2026", f"{first_month_short} – {last_month_short}"),
     ("June 2023 to June 2026", f"{first_month_long} to {last_month_long}"),
-    ("Jan'26 – Jun'26", f"{months2026_short[0]} – {months2026_short[-1]}"),
+    ("Jan'25 – Jun'26", f"{all_months_short[0]} – {all_months_short[-1]}"),
     ("26 Jul 2026", today_str),
 ]
 for old, new in replacements:
@@ -253,9 +268,9 @@ for old, new in replacements:
         print(f"NOTE: literal '{old}' not found (0 occurrences) — skipped")
     html = html.replace(old, new)
 
-# Note: "Top apps this month" / "Leaderboard" / "P2P split" / "Categories" section notes,
-# and the month-select <option> list, are populated live by JS (updateMonthLabels(),
-# monthSelectEl.innerHTML) from months2026Full — no HTML patching needed for those.
+# Note: Leaderboard / P2P split / Categories section notes, and the month-select
+# <option> list, are populated live by JS (updateMonthLabels(), monthSelectEl.innerHTML)
+# from allMonthsFull — no HTML patching needed for those.
 
 if html == original_html:
     print("WARNING: no changes were made to the file at all")

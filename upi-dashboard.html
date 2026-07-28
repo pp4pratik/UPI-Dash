@@ -115,7 +115,7 @@
         <button class="toggle-btn active metric" data-metric="volume" role="tab" aria-selected="true">Volume</button>
         <button class="toggle-btn" data-metric="value" role="tab" aria-selected="false">Value</button>
       </div>
-      <select class="month-select" id="monthSelect" aria-label="Select month (2026)"></select>
+      <select class="month-select" id="monthSelect" aria-label="Select month (Jan 2025 – Jun 2026)"></select>
     </div>
     <button class="btn-ghost" id="downloadAllBtn">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 19h16"/></svg>
@@ -180,8 +180,8 @@
   </div>
 
   <div class="section">
-    <div class="section-head"><p class="section-title">App trend — 2026 so far</p><div class="section-actions"><p class="section-note">Jan'26 – Jun'26, top 5 apps</p><button class="mini-btn" data-raw="quarterRaw">Raw ▾</button><button class="mini-btn" data-csv="quarter">CSV</button></div></div>
-    <div class="card"><div style="position:relative;height:220px;"><canvas id="quarterChart" role="img" aria-label="Line chart of 2026 monthly trend for top 5 UPI apps"></canvas></div>
+    <div class="section-head"><p class="section-title">App trend — Jan 2025 to Jun 2026</p><div class="section-actions"><p class="section-note">Jan'25 – Jun'26, top 5 apps</p><button class="mini-btn" data-raw="quarterRaw">Raw ▾</button><button class="mini-btn" data-csv="quarter">CSV</button></div></div>
+    <div class="card"><div style="position:relative;height:220px;"><canvas id="quarterChart" role="img" aria-label="Line chart of 2025-2026 monthly trend for top 5 UPI apps"></canvas></div>
     <div class="raw-panel" id="quarterRaw"></div></div>
   </div>
 
@@ -209,7 +209,7 @@
       <a href="https://www.npci.org.in/product/ecosystem-statistics/upi" target="_blank" rel="noopener">NPCI — UPI Ecosystem Statistics</a>
       <a href="https://www.npci.org.in/circulars/upi" target="_blank" rel="noopener">NPCI — UPI Circulars & Notifications</a>
     </div>
-    <p class="disclaimer">All figures pulled directly from NPCI's official statistics pages on 26 Jul 2026. App leaderboard, P2P/P2M split, merchant categories, geography, and average ticket size are all month-selectable for Jan–Jun 2026 via the month picker above. NPCI only published a district-level geography breakdown for Mar–Jun 2026; Jan–Feb show state-level figures instead since that's all NPCI published for those months. Ticket size (overall and by P2P/P2M) is computed by this dashboard from NPCI's volume/value figures, not published directly by NPCI. April and May 2024/2025 are absent from NPCI's monthly series as published. NPCI states it makes no warranty on completeness or continued validity of this data.</p>
+    <p class="disclaimer">All figures pulled directly from NPCI's official statistics pages on 28 Jul 2026. App leaderboard, P2P/P2M split, merchant categories, geography, and average ticket size are all month-selectable for Jan 2025–Jun 2026 via the month picker above. NPCI only published a district-level geography breakdown for Mar–Jun 2026; all of 2025 and Jan–Feb 2026 show state-level figures instead since that's all NPCI published for those months. Ticket size (overall and by P2P/P2M) is computed by this dashboard from NPCI's volume/value figures, not published directly by NPCI. NPCI states it makes no warranty on completeness or continued validity of this data.</p>
   </div>
 
   </div>
@@ -255,7 +255,7 @@
     <div class="footer">
       <p class="footer-title">Source</p>
       <div class="sources"><a href="https://www.npci.org.in/product/ecosystem-statistics/autopay" target="_blank" rel="noopener">NPCI — AutoPay Ecosystem Statistics</a></div>
-      <p class="disclaimer">Pulled directly from NPCI's AutoPay Ecosystem Statistics on 26 Jul 2026. June 2026 had no published data at pull time, so May 2026 is shown. Execution figures reflect the top 20 of "Top 50 Remitter Banks" as displayed.</p>
+      <p class="disclaimer">Pulled directly from NPCI's AutoPay Ecosystem Statistics on 28 Jul 2026. June 2026 had no published data at pull time, so May 2026 is shown. Execution figures reflect the top 20 of "Top 50 Remitter Banks" as displayed.</p>
     </div>
   </div>
 
@@ -284,25 +284,27 @@ function downloadCSV(filename, rows){
   var a = document.createElement('a'); a.href=url; a.download=filename; document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
 }
 
-// ---------- RAW DATA: app-monthly, 2026 (Jan-Jun) ----------
-var months2026 = ["Jan'26","Feb'26","Mar'26","Apr'26","May'26","Jun'26"];
-var months2026Full = ["January 2026","February 2026","March 2026","April 2026","May 2026","June 2026"];
-var monthTotalVol = [21703.44,20394.18,22641.11,22346.8,23201.93,22716.07];
-var monthTotalVal = [2833481.22,2684229.29,2952542.05,2902988.05,2990424.21,2892138.67];
+// ---------- RAW DATA: app-monthly, Jan 2025 - Jun 2026 ----------
+var allMonths = ["Jan'25","Feb'25","Mar'25","Apr'25","May'25","Jun'25","Jul'25","Aug'25","Sep'25","Oct'25","Nov'25","Dec'25","Jan'26","Feb'26","Mar'26","Apr'26","May'26","Jun'26"];
+var allMonthsFull = ["January 2025","February 2025","March 2025","April 2025","May 2025","June 2025","July 2025","August 2025","September 2025","October 2025","November 2025","December 2025","January 2026","February 2026","March 2026","April 2026","May 2026","June 2026"];
+var monthTotalVol = [16996,16106.19,18301.51,17893.42,18677.46,18395.01,19467.95,20008.31,19633.43,20700.92,20466.98,21634.67,21703.44,20394.18,22641.11,22346.8,23201.93,22716.07];
+var monthTotalVal = [2348037.12,2196481.69,2477221.61,2394925.87,2514297.01,2403930.69,2508498.09,2485472.91,2489736.54,2727790.68,2631632.63,2796712.73,2833481.22,2684229.29,2952542.05,2902988.05,2990424.21,2892138.67];
 var appData = {
-  "PhonePe":{vol:[9913.63,9284.22,10503.81,10330.3,10734.58,10483.73], val:[1377458.79,1310392.95,1448286.63,1431722.56,1467168.63,1419193.39]},
-  "Google Pay":{vol:[7229.11,6767.14,7535.71,7359.44,7598.37,7407.71], val:[956985.04,903051.6,999480.47,972068.42,1002878.34,967055.79]},
-  "Paytm":{vol:[1659.49,1595.09,1770,1778.06,1836.02,1798.84], val:[181973.34,174128.86,192610.34,194317.77,199103.37,192617.38]},
-  "Navi":{vol:[709.26,650.28,790.34,801.87,824.11,842.51], val:[37955.69,36563,43044.76,42683.85,43601.66,43948.56]},
-  "super.money":{vol:[298.41,289.32,341.24,369.41,418.84,430.24], val:[12546.39,12314.08,14788.83,16365.13,19422.73,20252.4]},
-  "BHIM":{vol:[172.07,175.93,202.44,210.17,227.49,223.54], val:[22025.89,21263.92,24718.8,25198.44,26013.59,25612.81]},
-  "FamApp":{vol:[161.18,149.06,168.6,182.87,197.32,195.31], val:[2038.12,1898.62,2250.14,2503.31,2738.59,2666.23]},
-  "WhatsApp":{vol:[112.65,112.89,130.74,138.69,150.43,150.48], val:[8358.21,8557.08,9917.41,10498.22,11425.02,11391.85]},
-  "CRED":{vol:[156.86,145.98,163.2,157.51,157.19,141.78], val:[58840.62,54045.92,62029.55,56569.08,61002.44,55116.79]},
-  "Axis Bank Apps":{vol:[152.6,132.11,135.4,125.81,134.2,136.16], val:[13206.89,12157.93,13180.82,10253.66,13185.15,13120.62]}
+  "PhonePe":{vol:[8102.44,7656.4,8647.78,8362.31,8682.08,8547.04,8931.24,9152.54,8961.78,9410.55,9322.29,9799.14,9913.63,9284.22,10503.81,10330.3,10734.58,10483.73], val:[1191303.98,1118963.81,1257075.54,1205047.3,1256541.09,1198690.03,1220140.68,1199457.73,1203787.91,1306265.2,1274723.47,1360501.94,1377458.79,1310392.95,1448286.63,1431722.56,1467168.63,1419193.39]},
+  "Google Pay":{vol:[6183.91,5836.8,6596.76,6488.55,6740.42,6540.92,6922.92,7063.76,6832.93,7164.43,7020.94,7311.67,7229.11,6767.14,7535.71,7359.44,7598.37,7407.71], val:[826845.07,771089.15,866568.18,842628.56,884735.12,840931.06,891297.38,883682.27,873639.91,954048.01,905445.37,956693.92,956985.04,903051.6,999480.47,972068.42,1002878.34,967055.79]},
+  "Paytm":{vol:[1152.34,1079.64,1221.12,1210.24,1277.56,1269.16,1366.05,1407.23,1394.07,1498.54,1518.95,1624.45,1659.49,1595.09,1770,1778.06,1836.02,1798.84], val:[126313.45,117090.29,132912.04,131153.97,138068.97,134171.16,143650.62,143484.97,145134.78,166629.1,163210.19,175716.1,181973.34,174128.86,192610.34,194317.77,199103.37,192617.38]},
+  "Navi":{vol:[242.83,260.75,324.42,344.21,386.21,406.01,444.06,504.45,526.02,573.79,606.61,671.89,709.26,650.28,790.34,801.87,824.11,842.51], val:[13221.33,14322.97,18018.65,18841.19,21350.35,21814.51,23562.51,25396.91,26510.97,30599.37,32180.8,35715.89,37955.69,36563,43044.76,42683.85,43601.66,43948.56]},
+  "super.money":{vol:[124.83,139.1,171.75,175.24,203.42,218.96,252.85,256.64,256.34,264.77,265.07,286.86,298.41,289.32,341.24,369.41,418.84,430.24], val:[4565.57,4812.44,5933.08,5924.95,7054.28,7716.48,9018.71,9290.21,9852.44,10962.09,10569.55,11745.61,12546.39,12314.08,14788.83,16365.13,19422.73,20252.4]},
+  "BHIM":{vol:[0,0,0,0,0,73.07,87.13,100.17,110.84,124.25,139.11,155.75,172.07,175.93,202.44,210.17,227.49,223.54], val:[0,0,0,0,0,11725.85,14522.39,15002.68,16273.38,19376.26,18280.83,20246.97,22025.89,21263.92,24718.8,25198.44,26013.59,25612.81]},
+  "FamApp":{vol:[79.01,77.08,89.94,99.91,110.38,112.75,125,135.65,140.01,146.03,149.79,159.05,161.18,149.06,168.6,182.87,197.32,195.31], val:[896.25,876.12,1099.28,1241.8,1415.4,1439.64,1563.58,1708.85,1751.77,1900.99,1867.72,2007.01,2038.12,1898.62,2250.14,2503.31,2738.59,2666.23]},
+  "WhatsApp":{vol:[60.99,58.86,0,67.4,70.19,0,0,0,0,0,87.06,100.45,112.65,112.89,130.74,138.69,150.43,150.48], val:[4550.41,4349.62,0,5065.44,5280.89,0,0,0,0,0,7168.01,7399.16,8358.21,8557.08,9917.41,10498.22,11425.02,11391.85]},
+  "CRED":{vol:[137.44,126.48,144.82,134.67,141.95,138.32,144.38,150,147.86,157.99,153.54,157.25,156.86,145.98,163.2,157.51,157.19,141.78], val:[49482.95,45127.72,55091.22,49753,55242.72,51384.11,55259.9,55756.24,54796.41,62438.03,59261.16,59073.03,58840.62,54045.92,62029.55,56569.08,61002.44,55116.79]},
+  "Axis Bank Apps":{vol:[126.62,117.7,145.78,120.05,120.03,126.27,123.44,135.14,158.05,113.58,133.63,144.75,152.6,132.11,135.4,125.81,134.2,136.16], val:[7769.17,9197.33,9966.53,9147.64,9683.82,9388.51,9773.39,9812.52,14911.36,15761.25,15515.97,13612.02,13206.89,12157.93,13180.82,10253.66,13185.15,13120.62]},
+  "ICICI Bank Apps":{vol:[0,0,67.63,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], val:[0,0,16696.94,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},
+  "Amazon Pay":{vol:[99.95,93.31,111.06,98.26,98.68,93.25,100.53,98.98,91.4,91.65,0,0,0,0,0,0,0,0], val:[9843.47,9077.3,10606.66,9966.68,10343.44,9942.48,10813.98,10830.8,10234.84,10710.43,0,0,0,0,0,0,0,0]}
 };
 var appNames = Object.keys(appData);
-var latestIdx = months2026.length - 1; // fixed reference month (Jun'26) for Ticket-size, which isn't month-selectable
+var latestIdx = allMonths.length - 1; // default selector position (most recent month)
 var selectedIdx = latestIdx; // driven by the month selector; used by leaderboard/share/P2P/categories
 
 function appVolShare(n){ return appData[n].vol[selectedIdx]/monthTotalVol[selectedIdx]*100; }
@@ -310,7 +312,7 @@ function appValShare(n){ return appData[n].val[selectedIdx]/monthTotalVal[select
 function appTicket(n,q){ return appData[n].val[q]/appData[n].vol[q]*10; }
 
 function sortedApps(){
-  return appNames.slice().sort(function(a,b){
+  return appNames.filter(function(n){ return appData[n].vol[selectedIdx] > 0; }).sort(function(a,b){
     return metric==='volume' ? appData[b].vol[selectedIdx]-appData[a].vol[selectedIdx] : appData[b].val[selectedIdx]-appData[a].val[selectedIdx];
   });
 }
@@ -358,8 +360,20 @@ function renderLeaderboard(){
   document.getElementById('leaderTable').innerHTML = html;
 }
 
-// ---------- RAW DATA: P2P/P2M by month, 2026 ----------
+// ---------- RAW DATA: P2P/P2M by month, Jan 2025 - Jun 2026 ----------
 var p2pData = [
+  {p2pVol:6426.25, p2pVal:1703333.03, p2mVol:10569.75, p2mVal:644704.09},
+  {p2pVol:6039.45, p2pVal:1606397.95, p2mVol:10066.74, p2mVal:590083.74},
+  {p2pVol:6840.45, p2pVal:1806811.06, p2mVol:11461.06, p2mVal:670410.55},
+  {p2pVol:6539.82, p2pVal:1731364.08, p2mVol:11353.6, p2mVal:663561.79},
+  {p2pVol:6823.8, p2pVal:1817672.02, p2mVol:11853.66, p2mVal:696624.99},
+  {p2pVol:6685.63, p2pVal:1721058.47, p2mVol:11709.38, p2mVal:682872.22},
+  {p2pVol:7079.84, p2pVal:1774485.73, p2mVol:12388.11, p2mVal:734012.36},
+  {p2pVol:7303.15, p2pVal:1761675.49, p2mVol:12705.16, p2mVal:723797.42},
+  {p2pVol:7266.46, p2pVal:1770169.25, p2mVol:12366.97, p2mVal:719567.29},
+  {p2pVol:7673.36, p2pVal:1902048.48, p2mVol:13027.56, p2mVal:825742.2},
+  {p2pVol:7626.49, p2pVal:1867080.57, p2mVol:12840.49, p2mVal:764552.06},
+  {p2pVol:8152.29, p2pVal:1989139.74, p2mVol:13482.38, p2mVal:807572.99},
   {p2pVol:8095.35, p2pVal:1992655.39, p2mVol:13608.1, p2mVal:840825.83},
   {p2pVol:7598.4, p2pVal:1911812.35, p2mVol:12795.78, p2mVal:772416.94},
   {p2pVol:8460.65, p2pVal:2091059, p2mVol:14180.46, p2mVal:861483.05},
@@ -385,8 +399,20 @@ function renderP2P(){
   window._p2pTicket = p2pTicket; window._p2mTicket = p2mTicket;
 }
 
-// ---------- RAW DATA: top-5 merchant categories by month, 2026 ----------
+// ---------- RAW DATA: top-5 merchant categories by month, Jan 2025 - Jun 2026 ----------
 var categoriesByMonth = [
+  [ {name:"Groceries and supermarkets", vol:2421.74, val:56040.86}, {name:"Fast food restaurants", vol:1116.13, val:13324.51}, {name:"Eating places and restaurants", vol:1004.01, val:16271.84}, {name:"Telecommunication services, including local and long distance calls, credit card calls, calls through use of magnetic stripe reading telephones and faxes", vol:827.32, val:19568.1}, {name:"Service stations (with or without ancillary services)", vol:510.96, val:30520.41} ],
+  [ {name:"Groceries and supermarkets", vol:2337.3, val:53191.68}, {name:"Fast food restaurants", vol:1048.77, val:12706.77}, {name:"Eating places and restaurants", vol:950.1, val:14811.62}, {name:"Telecommunication services, including local and long distance calls, credit card calls, calls through use of magnetic stripe reading telephones and faxes", vol:774.88, val:17922.78}, {name:"Service stations (with or without ancillary services)", vol:494.38, val:29937.81} ],
+  [ {name:"Groceries and supermarkets", vol:2730.18, val:61999.7}, {name:"Fast food restaurants", vol:1127.01, val:13740.91}, {name:"Eating places and restaurants", vol:1059.15, val:17014.22}, {name:"Telecommunication services, including local and long distance calls, credit card calls, calls through use of magnetic stripe reading telephones and faxes", vol:896.41, val:20150.23}, {name:"Service stations (with or without ancillary services)", vol:551.45, val:32535.12} ],
+  [ {name:"Groceries and supermarkets", vol:2699.03, val:60073.81}, {name:"Fast food restaurants", vol:1104.47, val:13153.73}, {name:"Eating places and restaurants", vol:1072.96, val:17279.32}, {name:"Telecommunication services, including local and long distance calls, credit card calls, calls through use of magnetic stripe reading telephones and faxes", vol:857.14, val:19323.48}, {name:"Service stations (with or without ancillary services)", vol:552.2, val:33921.33} ],
+  [ {name:"Groceries and supermarkets", vol:2826.09, val:64483.81}, {name:"Fast food restaurants", vol:1160.3, val:14132}, {name:"Eating places and restaurants", vol:1133.93, val:18755.38}, {name:"Telecommunication services, including local and long distance calls, credit card calls, calls through use of magnetic stripe reading telephones and faxes", vol:879.66, val:19907.48}, {name:"Service stations (with or without ancillary services)", vol:590.57, val:36592.74} ],
+  [ {name:"Groceries and supermarkets", vol:2848.11, val:63307.98}, {name:"Fast food restaurants", vol:1144.14, val:13511.21}, {name:"Eating places and restaurants", vol:1102.1, val:18217.2}, {name:"Telecommunication services, including local and long distance calls, credit card calls, calls through use of magnetic stripe reading telephones and faxes", vol:843.97, val:19946.5}, {name:"Service stations (with or without ancillary services)", vol:591.24, val:35909.85} ],
+  [ {name:"Groceries and supermarkets", vol:3032.59, val:64881.98}, {name:"Fast food restaurants", vol:1221.46, val:13794.22}, {name:"Eating places and restaurants", vol:1153.4, val:18212.77}, {name:"Telecommunication services, including local and long distance calls, credit card calls, calls through use of magnetic stripe reading telephones and faxes", vol:871.88, val:21628.8}, {name:"Service stations (with or without ancillary services)", vol:612.49, val:35188.88} ],
+  [ {name:"Groceries and supermarkets", vol:3129.4, val:68115.89}, {name:"Fast food restaurants", vol:1263.07, val:14542}, {name:"Eating places and restaurants", vol:1182.83, val:19432.25}, {name:"Telecommunication services, including local and long distance calls, credit card calls, calls through use of magnetic stripe reading telephones and faxes", vol:865.65, val:21218.15}, {name:"Service stations (with or without ancillary services)", vol:626.95, val:34546.82} ],
+  [ {name:"Groceries and supermarkets", vol:3126.25, val:66408.93}, {name:"Fast food restaurants", vol:1294.94, val:14377.65}, {name:"Eating places and restaurants", vol:1164.23, val:18004.68}, {name:"Telecommunication services, including local and long distance calls, credit card calls, calls through use of magnetic stripe reading telephones and faxes", vol:829, val:20882.02}, {name:"Service stations (with or without ancillary services)", vol:619.5, val:34040.2} ],
+  [ {name:"Groceries and supermarkets", vol:3273.16, val:76073.21}, {name:"Fast food restaurants", vol:1357.89, val:16798.24}, {name:"Eating places and restaurants", vol:1190.63, val:20842.26}, {name:"Telecommunication services, including local and long distance calls, credit card calls, calls through use of magnetic stripe reading telephones and faxes", vol:867.86, val:22168.74}, {name:"Service stations (with or without ancillary services)", vol:657.36, val:38072.43} ],
+  [ {name:"Groceries and supermarkets", vol:3222.99, val:71129.56}, {name:"Fast food restaurants", vol:1406.7, val:16149.43}, {name:"Eating places and restaurants", vol:1202.63, val:19547.09}, {name:"Telecommunication services, including local and long distance calls, credit card calls, calls through use of magnetic stripe reading telephones and faxes", vol:817.83, val:21399.7}, {name:"Service stations (with or without ancillary services)", vol:657.73, val:40320.95} ],
+  [ {name:"Groceries and supermarkets", vol:3358.74, val:74921.67}, {name:"Fast food restaurants", vol:1508.67, val:17570.77}, {name:"Eating places and restaurants", vol:1262.24, val:21100.7}, {name:"Telecommunication services, including local and long distance calls, credit card calls, calls through use of magnetic stripe reading telephones and faxes", vol:863.19, val:22744.78}, {name:"Service stations (with or without ancillary services)", vol:661.28, val:40884.7} ],
   [ {name:"Grocery Stores, Supermarkets", vol:3419.81, val:76833.09}, {name:"Fast food restaurants", vol:1502.57, val:17483.76}, {name:"Eating places and restaurants", vol:1258.98, val:21184.95}, {name:"Telecommunication services, including local and long distance calls, credit card calls, calls through use of magnetic stripe reading telephones and faxes", vol:878.66, val:22840.64}, {name:"Service stations (with or without ancillary services)", vol:658.84, val:40053.68} ],
   [ {name:"Groceries and supermarkets", vol:3283.85, val:74127.95}, {name:"Fast food restaurants", vol:1382.81, val:15639.68}, {name:"Eating places and restaurants", vol:1165.56, val:19070.54}, {name:"Telecommunication services, including local and long distance calls, credit card calls, calls through use of magnetic stripe reading telephones and faxes", vol:794.75, val:20715.85}, {name:"Service stations (with or without ancillary services)", vol:633.99, val:38811.08} ],
   [ {name:"Groceries and supermarkets", vol:3751.09, val:81879.85}, {name:"Fast food restaurants", vol:1474.74, val:17237.27}, {name:"Eating places and restaurants", vol:1250.99, val:20784.67}, {name:"Telecommunication services, including local and long distance calls, credit card calls, calls through use of magnetic stripe reading telephones and faxes", vol:914.48, val:23723.04}, {name:"Service stations (with or without ancillary services)", vol:674.46, val:44180.28} ],
@@ -403,10 +429,22 @@ function renderCategories(){
   window._categories = categories;
 }
 
-// ---------- RAW DATA: geography by month, 2026 ----------
-// NPCI only published district-level breakdowns for Mar-Jun 2026; Jan-Feb are state-level only.
-var geoGranularity = ['State','State','District','District','District','District'];
+// ---------- RAW DATA: geography by month, Jan 2025 - Jun 2026 ----------
+// NPCI only published district-level breakdowns for Mar-Jun 2026; all of 2025 and Jan-Feb 2026 are state-level only.
+var geoGranularity = ['State','State','State','State','State','State','State','State','State','State','State','State','State','State','District','District','District','District'];
 var geographyByMonth = [
+  [ {name:"Maharashtra", vol:12.51, val:10.75}, {name:"Karnataka", vol:6.67, val:6.62}, {name:"Uttar Pradesh", vol:5.6, val:5.67}, {name:"Telangana", vol:4.71, val:5.46}, {name:"Tamil Nadu", vol:4.21, val:4.63}, {name:"Andhra Pradesh", vol:3.25, val:4.17}, {name:"Rajasthan", vol:3.2, val:3.63}, {name:"Gujarat", vol:2.84, val:3.21}, {name:"Madhya Pradesh", vol:2.8, val:2.77}, {name:"West Bengal", vol:2.51, val:2.89} ],
+  [ {name:"Maharashtra", vol:11.75, val:10.01}, {name:"Karnataka", vol:6.05, val:6.03}, {name:"Uttar Pradesh", vol:5.29, val:5.58}, {name:"Telangana", vol:4.37, val:5.06}, {name:"Tamil Nadu", vol:4.04, val:4.55}, {name:"Andhra Pradesh", vol:2.88, val:3.73}, {name:"Rajasthan", vol:2.86, val:3.26}, {name:"Gujarat", vol:2.58, val:2.87}, {name:"Madhya Pradesh", vol:2.42, val:2.44}, {name:"West Bengal", vol:2.24, val:2.58} ],
+  [ {name:"Maharashtra", vol:12, val:10.27}, {name:"Karnataka", vol:5.97, val:6.14}, {name:"Uttar Pradesh", vol:5.26, val:5.41}, {name:"Telangana", vol:4.29, val:5.04}, {name:"Tamil Nadu", vol:3.99, val:4.5}, {name:"Andhra Pradesh", vol:2.87, val:3.78}, {name:"Rajasthan", vol:2.82, val:3.15}, {name:"Gujarat", vol:2.57, val:2.84}, {name:"Madhya Pradesh", vol:2.34, val:2.35}, {name:"Delhi", vol:2.29, val:2.16} ],
+  [ {name:"Maharashtra", vol:13.31, val:11.62}, {name:"Karnataka", vol:7.06, val:7.24}, {name:"Uttar Pradesh", vol:6.74, val:6.67}, {name:"Telangana", vol:5.31, val:6.14}, {name:"Tamil Nadu", vol:4.34, val:4.82}, {name:"Rajasthan", vol:3.74, val:4.1}, {name:"Andhra Pradesh", vol:3.37, val:4.4}, {name:"Bihar", vol:3.23, val:3.45}, {name:"Madhya Pradesh", vol:3.22, val:3.26}, {name:"Gujarat", vol:3.01, val:3.23} ],
+  [ {name:"Maharashtra", vol:13.19, val:11.82}, {name:"Karnataka", vol:7.73, val:7.97}, {name:"Uttar Pradesh", vol:7.5, val:7.24}, {name:"Telangana", vol:5.83, val:6.96}, {name:"Tamil Nadu", vol:4.6, val:5.19}, {name:"Rajasthan", vol:4.09, val:4.47}, {name:"Madhya Pradesh", vol:3.68, val:3.69}, {name:"Andhra Pradesh", vol:3.65, val:4.74}, {name:"Bihar", vol:3.63, val:3.91}, {name:"Delhi", vol:3.24, val:2.88} ],
+  [ {name:"Maharashtra", vol:9.47, val:8.8}, {name:"Karnataka", vol:5.44, val:5.61}, {name:"Uttar Pradesh", vol:5.29, val:5.15}, {name:"Telangana", vol:4.01, val:4.94}, {name:"Tamil Nadu", vol:3.8, val:4.37}, {name:"Andhra Pradesh", vol:2.7, val:3.62}, {name:"Rajasthan", vol:2.6, val:2.91}, {name:"Gujarat", vol:2.4, val:2.66}, {name:"Delhi", vol:2.28, val:2.11}, {name:"West Bengal", vol:2.16, val:2.39} ],
+  [ {name:"Maharashtra", vol:9.79, val:9.19}, {name:"Karnataka", vol:5.48, val:5.76}, {name:"Uttar Pradesh", vol:5.3, val:5.26}, {name:"Telangana", vol:4.07, val:5.05}, {name:"Tamil Nadu", vol:4, val:4.67}, {name:"Andhra Pradesh", vol:2.75, val:3.73}, {name:"Rajasthan", vol:2.71, val:3.03}, {name:"Gujarat", vol:2.58, val:2.95}, {name:"Delhi", vol:2.4, val:2.35}, {name:"West Bengal", vol:2.19, val:2.48} ],
+  [ {name:"Maharashtra", vol:9.92, val:9.36}, {name:"Karnataka", vol:5.39, val:5.73}, {name:"Uttar Pradesh", vol:5.29, val:5.29}, {name:"Telangana", vol:4.02, val:4.92}, {name:"Tamil Nadu", vol:3.99, val:4.75}, {name:"Andhra Pradesh", vol:2.76, val:3.71}, {name:"Rajasthan", vol:2.71, val:3.02}, {name:"Gujarat", vol:2.57, val:2.96}, {name:"Delhi", vol:2.44, val:2.4}, {name:"West Bengal", vol:2.18, val:2.5} ],
+  [ {name:"Maharashtra", vol:10.05, val:9.48}, {name:"Karnataka", vol:5.4, val:5.78}, {name:"Uttar Pradesh", vol:5.28, val:5.3}, {name:"Telangana", vol:4.05, val:4.95}, {name:"Tamil Nadu", vol:3.97, val:4.78}, {name:"Andhra Pradesh", vol:2.74, val:3.65}, {name:"Rajasthan", vol:2.64, val:2.96}, {name:"Gujarat", vol:2.62, val:3.03}, {name:"Delhi", vol:2.5, val:2.46}, {name:"West Bengal", vol:2.27, val:2.66} ],
+  [ {name:"Maharashtra", vol:10.37, val:9.81}, {name:"Uttar Pradesh", vol:5.49, val:5.63}, {name:"Karnataka", vol:5.25, val:5.53}, {name:"Telangana", vol:4.04, val:4.8}, {name:"Tamil Nadu", vol:3.92, val:4.7}, {name:"Andhra Pradesh", vol:2.7, val:3.55}, {name:"Rajasthan", vol:2.65, val:3.11}, {name:"Gujarat", vol:2.58, val:3.13}, {name:"Delhi", vol:2.46, val:2.48}, {name:"Madhya Pradesh", vol:2.18, val:2.25} ],
+  [ {name:"Maharashtra", vol:10.52, val:9.53}, {name:"Uttar Pradesh", vol:5.47, val:5.79}, {name:"Karnataka", vol:5.4, val:5.71}, {name:"Telangana", vol:4.16, val:4.99}, {name:"Tamil Nadu", vol:3.98, val:4.69}, {name:"Andhra Pradesh", vol:2.75, val:3.57}, {name:"Rajasthan", vol:2.59, val:3.09}, {name:"Gujarat", vol:2.49, val:2.89}, {name:"Delhi", vol:2.4, val:2.45}, {name:"Bihar", vol:2.23, val:2.53} ],
+  [ {name:"Maharashtra", vol:10.86, val:9.43}, {name:"Karnataka", vol:5.39, val:5.8}, {name:"Uttar Pradesh", vol:5.3, val:5.55}, {name:"Telangana", vol:4.1, val:5.05}, {name:"Tamil Nadu", vol:3.99, val:4.69}, {name:"Andhra Pradesh", vol:2.82, val:3.67}, {name:"Rajasthan", vol:2.57, val:3.04}, {name:"Gujarat", vol:2.57, val:3.1}, {name:"Delhi", vol:2.39, val:2.38}, {name:"West Bengal", vol:2.21, val:2.54} ],
   [ {name:"Maharashtra", vol:10.46, val:9.42}, {name:"Karnataka", vol:5.37, val:5.81}, {name:"Uttar Pradesh", vol:5.21, val:5.43}, {name:"Telangana", vol:4.01, val:4.91}, {name:"Tamil Nadu", vol:3.96, val:4.68}, {name:"Andhra Pradesh", vol:2.89, val:3.81}, {name:"Gujarat", vol:2.62, val:3.12}, {name:"Rajasthan", vol:2.58, val:3.02}, {name:"Delhi", vol:2.37, val:2.41}, {name:"West Bengal", vol:2.27, val:2.6} ],
   [ {name:"Maharashtra", vol:10.09, val:9.2}, {name:"Karnataka", vol:5.35, val:5.79}, {name:"Uttar Pradesh", vol:5.31, val:5.59}, {name:"Tamil Nadu", vol:4.06, val:4.88}, {name:"Telangana", vol:4.06, val:4.91}, {name:"Andhra Pradesh", vol:2.81, val:3.67}, {name:"Gujarat", vol:2.58, val:2.99}, {name:"Rajasthan", vol:2.57, val:2.99}, {name:"Delhi", vol:2.38, val:2.43}, {name:"West Bengal", vol:2.2, val:2.57} ],
   [ {name:"Bengaluru (Urban)", vol:2.97, val:3.15}, {name:"Mumbai Suburban", vol:2.56, val:2}, {name:"Pune", vol:1.92, val:1.72}, {name:"Thane", vol:1.1, val:1.01}, {name:"Mumbai", vol:1, val:0.86}, {name:"Ranga Reddy", vol:0.93, val:1.11}, {name:"Chennai", vol:0.93, val:1.03}, {name:"Medchal-Malkajgiri", vol:0.89, val:1.03}, {name:"Hyderabad", vol:0.75, val:0.84}, {name:"Gurugram", vol:0.74, val:0.66} ],
@@ -428,7 +466,7 @@ function renderGeo(){
   document.getElementById('geoTable').innerHTML = html;
   document.getElementById('geoColHead').textContent = granularity;
   document.getElementById('geoTitle').textContent = 'Geography — top ' + (granularity==='District'?'districts':'states') + ' nationally';
-  document.getElementById('geoNote').textContent = months2026Full[selectedIdx] + ' · NPCI reports at ' + granularity.toLowerCase() + ' level' + (granularity==='State' ? ' for this month' : '');
+  document.getElementById('geoNote').textContent = allMonthsFull[selectedIdx] + ' · NPCI reports at ' + granularity.toLowerCase() + ' level' + (granularity==='State' ? ' for this month' : '');
   document.getElementById('geoFootnote').textContent = granularity==='District'
     ? 'District-level breakdown as published by NPCI for this month.'
     : 'NPCI did not publish a district-level breakdown for this month — showing state-level figures instead.';
@@ -442,13 +480,13 @@ function renderQuarter(){
     return {label:n, data:d, borderColor:appColors[n], backgroundColor:appColors[n], tension:0.3};
   });
   if (quarterChart) quarterChart.destroy();
-  quarterChart = new Chart(document.getElementById('quarterChart'), { type:'line', data:{labels:months2026, datasets:datasets},
+  quarterChart = new Chart(document.getElementById('quarterChart'), { type:'line', data:{labels:allMonths, datasets:datasets},
     options:{ responsive:true, maintainAspectRatio:false, scales:{x:{grid:{display:false}},y:{title:{display:true,text:metric==='volume'?'Volume (B)':'Value (₹L cr)',font:{size:11}},grid:{color:'rgba(255,255,255,0.06)'}}},
       plugins:{legend:{display:true,position:'bottom',labels:{boxWidth:10,font:{size:11}}}} } });
 }
 
 function renderQuarterRaw(){
-  var html = '<table><thead><tr><th>App</th>' + months2026.map(function(m){return '<th>'+m+' Vol(Mn)</th>';}).join('') + months2026.map(function(m){return '<th>'+m+' Val(Cr)</th>';}).join('') + '</tr></thead><tbody>';
+  var html = '<table><thead><tr><th>App</th>' + allMonths.map(function(m){return '<th>'+m+' Vol(Mn)</th>';}).join('') + allMonths.map(function(m){return '<th>'+m+' Val(Cr)</th>';}).join('') + '</tr></thead><tbody>';
   appNames.forEach(function(n){
     var d=appData[n];
     html += '<tr><td class="name">'+n+'</td>' + d.vol.map(function(v){return '<td>'+v.toLocaleString('en-IN')+'</td>';}).join('') + d.val.map(function(v){return '<td>'+v.toLocaleString('en-IN')+'</td>';}).join('') + '</tr>';
@@ -468,7 +506,7 @@ function renderTicket(){
       scales:{x:{grid:{display:false}},y:{grid:{color:'rgba(255,255,255,0.06)'},title:{display:true,text:'₹ per transaction',font:{size:11}}}},
       plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return '₹'+c.raw.toLocaleString('en-IN');}}}} } });
   window._tOrder=tOrder; window._tData=tData;
-  document.getElementById('ticketNote').textContent = months2026Full[selectedIdx] + ', ₹ per transaction';
+  document.getElementById('ticketNote').textContent = allMonthsFull[selectedIdx] + ', ₹ per transaction';
 }
 
 var circulars = [
@@ -543,7 +581,7 @@ renderAll();
 renderAutoPay();
 
 function updateMonthLabels(){
-  var label = months2026Full[selectedIdx];
+  var label = allMonthsFull[selectedIdx];
   ['p2pNote','categoriesNote'].forEach(function(id){
     var el = document.getElementById(id); if (el) el.textContent = label;
   });
@@ -551,7 +589,7 @@ function updateMonthLabels(){
 }
 
 var monthSelectEl = document.getElementById('monthSelect');
-monthSelectEl.innerHTML = months2026Full.map(function(m,i){ return '<option value="'+i+'"'+(i===selectedIdx?' selected':'')+'>'+m+'</option>'; }).join('');
+monthSelectEl.innerHTML = allMonthsFull.map(function(m,i){ return '<option value="'+i+'"'+(i===selectedIdx?' selected':'')+'>'+m+'</option>'; }).join('');
 monthSelectEl.addEventListener('change', function(){
   selectedIdx = +this.value;
   renderLeaderboard(); renderP2P(); renderCategories(); renderGeo(); renderTicket();
@@ -592,7 +630,7 @@ document.querySelectorAll('[data-csv]').forEach(function(btn){
       rows.push([geoGranularity[selectedIdx],'Volume Share %','Value Share %']);
       (window._geo||[]).forEach(function(g){ rows.push([g.name,g.vol,g.val]); });
     } else if (key==='quarter'){
-      rows.push(['App'].concat(months2026.map(function(m){return m+' Vol(Mn)';})).concat(months2026.map(function(m){return m+' Val(Cr)';})));
+      rows.push(['App'].concat(allMonths.map(function(m){return m+' Vol(Mn)';})).concat(allMonths.map(function(m){return m+' Val(Cr)';})));
       appNames.forEach(function(n){ var d=appData[n]; rows.push([n].concat(d.vol).concat(d.val)); });
     } else if (key==='ticket'){
       rows.push(['App','Avg ticket size (Rs)']);
@@ -614,10 +652,10 @@ document.querySelectorAll('[data-csv]').forEach(function(btn){
 });
 
 document.getElementById('downloadAllBtn').addEventListener('click', function(){
-  var rows = [['UPI Pulse — full data export'],['Source: NPCI Product & Ecosystem Statistics, pulled 26 Jul 2026'],[]];
+  var rows = [['UPI Pulse — full data export'],['Source: NPCI Product & Ecosystem Statistics, pulled 28 Jul 2026'],[]];
   rows.push(['MONTHLY TREND']); rows.push(['Month','Volume (Mn)','MoM %','YoY %','Value (Cr)','MoM %','YoY %']);
   for (var i=0;i<months.length;i++){ rows.push([months[i], mVol[i]||'', mom(mVol,i)||'', yoy(mVol,i)||'', mVal[i]||'', mom(mVal,i)||'', yoy(mVal,i)||'']); }
-  rows.push([]); rows.push(['APP LEADERBOARD ('+months2026[selectedIdx]+')']); rows.push(['App','Volume (Mn)','Value (Cr)','Avg ticket (Rs)']);
+  rows.push([]); rows.push(['APP LEADERBOARD ('+allMonths[selectedIdx]+')']); rows.push(['App','Volume (Mn)','Value (Cr)','Avg ticket (Rs)']);
   appNames.forEach(function(n){ rows.push([n, appData[n].vol[selectedIdx], appData[n].val[selectedIdx], appTicket(n,selectedIdx).toFixed(0)]); });
   rows.push([]); rows.push(['CIRCULARS']); rows.push(['Reference','FY','Title','PDF URL']);
   circulars.forEach(function(c){ rows.push([c.ref,c.fy,c.title,c.pdf||'']); });
