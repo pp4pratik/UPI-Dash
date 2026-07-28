@@ -254,7 +254,7 @@ def count_occurrences(text, sub):
     return text.count(sub)
 
 replacements = [
-    ("34 circulars", f"{circulars_count} circulars"),
+    ("34 total", f"{circulars_count} total"),
     ("June 2026", last_month_long),
     ("May 2026", ap_reg_month_long),
     ("Jun 2023 – Jun 2026", f"{first_month_short} – {last_month_short}"),

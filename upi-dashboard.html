@@ -60,7 +60,7 @@
   .section-actions{display:flex;gap:8px;align-items:center;}
   .mini-btn{font-family:'JetBrains Mono',monospace;font-size:11.5px;color:var(--text-secondary);background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:5px 10px;cursor:pointer;white-space:nowrap;}
   .mini-btn:hover{color:var(--text);}
-  .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px 24px;}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:22px 24px;min-width:0;}
   .row-2{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
   .legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:14px;font-size:12.5px;color:var(--text-secondary);}
   .legend span{display:inline-flex;align-items:center;gap:6px;}
@@ -90,10 +90,13 @@
   .sources a{color:var(--teal);text-decoration:none;}
   .sources a:hover{text-decoration:underline;}
   .disclaimer{font-size:12px;color:var(--text-muted);line-height:1.6;max-width:820px;}
+  .table-scroll{overflow-x:auto;}
+  .p2p-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
   @media(max-width:820px){
     .hero-grid{grid-template-columns:1fr;}
     .kpi-strip, .kpi-strip.four{grid-template-columns:repeat(2,1fr);}
     .row-2{grid-template-columns:1fr;}
+    .p2p-grid{grid-template-columns:1fr;}
     .hero-value{font-size:44px;}
   }
 </style>
@@ -147,23 +150,23 @@
       <p class="section-title">Leaderboard — top 10 apps</p>
       <div class="section-actions"><p class="section-note" id="leaderboardNote">June 2026 · sorted by selected metric</p><button class="mini-btn" data-csv="leaderboard">Download CSV</button></div>
     </div>
-    <div class="card"><table><thead><tr><th>#</th><th>App</th><th>Volume (Mn)</th><th>Value (₹ Cr)</th><th>Avg ticket (₹)</th><th>Share</th></tr></thead><tbody id="leaderTable"></tbody></table></div>
+    <div class="card"><div class="table-scroll"><table><thead><tr><th>#</th><th>App</th><th>Volume (Mn)</th><th>Value (₹ Cr)</th><th>Avg ticket (₹)</th><th>Share</th></tr></thead><tbody id="leaderTable"></tbody></table></div></div>
   </div>
 
   <div class="section">
     <div class="row-2">
       <div class="card">
         <div class="section-head"><p class="section-title">P2P vs P2M split</p><p class="section-note" id="p2pNote">June 2026</p></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-          <div><p class="section-note" style="text-align:center;margin:0 0 6px;">By volume</p><div style="position:relative;height:160px;"><canvas id="p2pVolChart"></canvas></div></div>
-          <div><p class="section-note" style="text-align:center;margin:0 0 6px;">By value</p><div style="position:relative;height:160px;"><canvas id="p2pValChart"></canvas></div></div>
+        <div class="p2p-grid">
+          <div><p class="section-note" style="text-align:center;margin:0 0 6px;">By volume</p><div style="position:relative;height:160px;"><canvas id="p2pVolChart" role="img" aria-label="Donut chart of P2P vs P2M share of transaction volume"></canvas></div></div>
+          <div><p class="section-note" style="text-align:center;margin:0 0 6px;">By value</p><div style="position:relative;height:160px;"><canvas id="p2pValChart" role="img" aria-label="Donut chart of P2P vs P2M share of transaction value"></canvas></div></div>
         </div>
         <div class="legend"><span><i style="background:#F5A524"></i>P2M</span><span><i style="background:#3FC1A8"></i>P2P</span></div>
         <div class="legend" id="p2pTicketRow" style="margin-top:6px;"></div>
       </div>
       <div class="card">
         <div class="section-head"><p class="section-title">Top merchant categories</p><div class="section-actions"><p class="section-note" id="categoriesNote">June 2026</p><button class="mini-btn" data-csv="category">CSV</button></div></div>
-        <table><thead><tr><th>Category</th><th id="catVolHead">Volume (Mn)</th><th id="catValHead">Value (₹ Cr)</th></tr></thead><tbody id="categoryTable"></tbody></table>
+        <div class="table-scroll"><table><thead><tr><th>Category</th><th id="catVolHead">Volume (Mn)</th><th id="catValHead">Value (₹ Cr)</th></tr></thead><tbody id="categoryTable"></tbody></table></div>
       </div>
     </div>
   </div>
@@ -174,7 +177,7 @@
       <div class="section-actions"><p class="section-note" id="geoNote">June 2026 · NPCI reports at district level</p><button class="mini-btn" data-csv="geo">Download CSV</button></div>
     </div>
     <div class="card">
-      <table><thead><tr><th id="geoColHead">District</th><th>Volume share</th><th>Value share</th></tr></thead><tbody id="geoTable"></tbody></table>
+      <div class="table-scroll"><table><thead><tr><th id="geoColHead">District</th><th>Volume share</th><th>Value share</th></tr></thead><tbody id="geoTable"></tbody></table></div>
       <p class="section-note" id="geoFootnote" style="margin-top:16px;">All ten highest-volume districts nationally sit in Maharashtra — Mumbai's metro belt alone accounts for 6.5% of all UPI volume.</p>
     </div>
   </div>
@@ -234,13 +237,13 @@
     </div>
     <div class="section">
       <div class="section-head"><p class="section-title">Registrations by PSP</p><div class="section-actions"><p class="section-note">May 2026</p><button class="mini-btn" data-csv="autopayReg">CSV</button></div></div>
-      <div class="card"><div style="position:relative;height:260px;"><canvas id="regChart"></canvas></div></div>
+      <div class="card"><div style="position:relative;height:260px;"><canvas id="regChart" role="img" aria-label="Bar chart of AutoPay registrations by PSP"></canvas></div></div>
     </div>
     <div class="section">
       <div class="row-2">
         <div class="card">
           <div class="section-head"><p class="section-title">Execution volume by remitter bank</p><div class="section-actions"><p class="section-note">May 2026</p><button class="mini-btn" data-csv="autopayExec">CSV</button></div></div>
-          <div style="position:relative;height:240px;"><canvas id="execChart"></canvas></div>
+          <div style="position:relative;height:240px;"><canvas id="execChart" role="img" aria-label="Bar chart of AutoPay execution volume by remitter bank"></canvas></div>
         </div>
         <div class="card">
           <div class="section-head"><p class="section-title">Common use cases</p><p class="section-note">Qualitative — NPCI doesn't publish a category split</p></div>
@@ -651,12 +654,23 @@ document.querySelectorAll('[data-csv]').forEach(function(btn){
   });
 });
 
+var currentView = 'upi';
+
 document.getElementById('downloadAllBtn').addEventListener('click', function(){
+  if (currentView === 'autopay'){
+    var apRows = [['UPI AutoPay — full data export'],['Source: NPCI AutoPay Ecosystem Statistics, pulled 28 Jul 2026'],[]];
+    apRows.push(['REGISTRATIONS BY PSP']); apRows.push(['PSP','Registrations (Mn)']);
+    window._regLabels.forEach(function(l,i){ apRows.push([l, window._regData[i]]); });
+    apRows.push([]); apRows.push(['EXECUTION VOLUME BY REMITTER BANK']); apRows.push(['Bank','Executions (Mn)']);
+    window._execLabels.forEach(function(l,i){ apRows.push([l, window._execData[i]]); });
+    downloadCSV('upi-pulse-autopay-full-data.csv', apRows);
+    return;
+  }
   var rows = [['UPI Pulse — full data export'],['Source: NPCI Product & Ecosystem Statistics, pulled 28 Jul 2026'],[]];
   rows.push(['MONTHLY TREND']); rows.push(['Month','Volume (Mn)','MoM %','YoY %','Value (Cr)','MoM %','YoY %']);
   for (var i=0;i<months.length;i++){ rows.push([months[i], mVol[i]||'', mom(mVol,i)||'', yoy(mVol,i)||'', mVal[i]||'', mom(mVal,i)||'', yoy(mVal,i)||'']); }
   rows.push([]); rows.push(['APP LEADERBOARD ('+allMonths[selectedIdx]+')']); rows.push(['App','Volume (Mn)','Value (Cr)','Avg ticket (Rs)']);
-  appNames.forEach(function(n){ rows.push([n, appData[n].vol[selectedIdx], appData[n].val[selectedIdx], appTicket(n,selectedIdx).toFixed(0)]); });
+  sortedApps().forEach(function(n){ rows.push([n, appData[n].vol[selectedIdx], appData[n].val[selectedIdx], appTicket(n,selectedIdx).toFixed(0)]); });
   rows.push([]); rows.push(['CIRCULARS']); rows.push(['Reference','FY','Title','PDF URL']);
   circulars.forEach(function(c){ rows.push([c.ref,c.fy,c.title,c.pdf||'']); });
   downloadCSV('upi-pulse-full-data.csv', rows);
@@ -665,12 +679,14 @@ document.getElementById('downloadAllBtn').addEventListener('click', function(){
 var toggleBtns = document.querySelectorAll('#viewToggle .toggle-btn');
 var viewUPI = document.getElementById('viewUPI');
 var viewAutopay = document.getElementById('viewAutopay');
+var metricToggleEl = document.getElementById('metricToggle');
 toggleBtns.forEach(function(btn){
   btn.addEventListener('click', function(){
     toggleBtns.forEach(function(b){ b.classList.remove('active'); b.setAttribute('aria-selected','false'); });
     btn.classList.add('active'); btn.setAttribute('aria-selected','true');
-    if (btn.dataset.view === 'upi'){ viewUPI.style.display=''; viewAutopay.style.display='none'; }
-    else { viewUPI.style.display='none'; viewAutopay.style.display=''; }
+    currentView = btn.dataset.view;
+    if (currentView === 'upi'){ viewUPI.style.display=''; viewAutopay.style.display='none'; metricToggleEl.style.display=''; monthSelectEl.style.display=''; }
+    else { viewUPI.style.display='none'; viewAutopay.style.display=''; metricToggleEl.style.display='none'; monthSelectEl.style.display='none'; }
   });
 });
 </script>
