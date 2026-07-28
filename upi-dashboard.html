@@ -118,7 +118,8 @@
         <button class="toggle-btn active metric" data-metric="volume" role="tab" aria-selected="true">Volume</button>
         <button class="toggle-btn" data-metric="value" role="tab" aria-selected="false">Value</button>
       </div>
-      <select class="month-select" id="monthSelect" aria-label="Select month (Jan 2025 – Jun 2026)"></select>
+      <select class="month-select" id="yearSelect" aria-label="Select year"></select>
+      <select class="month-select" id="monthSelect" aria-label="Select month"></select>
     </div>
     <button class="btn-ghost" id="downloadAllBtn">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 19h16"/></svg>
@@ -591,12 +592,42 @@ function updateMonthLabels(){
   var lb = document.getElementById('leaderboardNote'); if (lb) lb.textContent = label + ' · sorted by selected metric';
 }
 
+var yearGroups = {};
+allMonthsFull.forEach(function(full, idx){
+  var year = full.slice(-4);
+  var monthName = full.slice(0, full.length - 5);
+  (yearGroups[year] = yearGroups[year] || []).push({idx:idx, monthName:monthName});
+});
+var years = Object.keys(yearGroups).sort();
+var selectedYear = allMonthsFull[selectedIdx].slice(-4);
+
+var yearSelectEl = document.getElementById('yearSelect');
 var monthSelectEl = document.getElementById('monthSelect');
-monthSelectEl.innerHTML = allMonthsFull.map(function(m,i){ return '<option value="'+i+'"'+(i===selectedIdx?' selected':'')+'>'+m+'</option>'; }).join('');
-monthSelectEl.addEventListener('change', function(){
-  selectedIdx = +this.value;
+
+function populateMonthOptions(){
+  monthSelectEl.innerHTML = yearGroups[selectedYear].map(function(o){ return '<option value="'+o.idx+'"'+(o.idx===selectedIdx?' selected':'')+'>'+o.monthName+'</option>'; }).join('');
+}
+
+yearSelectEl.innerHTML = years.map(function(y){ return '<option value="'+y+'"'+(y===selectedYear?' selected':'')+'>'+y+'</option>'; }).join('');
+populateMonthOptions();
+
+function onSelectorChange(){
   renderLeaderboard(); renderP2P(); renderCategories(); renderGeo(); renderTicket();
   updateMonthLabels();
+}
+
+yearSelectEl.addEventListener('change', function(){
+  var prevMonthName = allMonthsFull[selectedIdx].slice(0, allMonthsFull[selectedIdx].length - 5);
+  selectedYear = this.value;
+  var opts = yearGroups[selectedYear];
+  var match = opts.filter(function(o){ return o.monthName === prevMonthName; })[0];
+  selectedIdx = match ? match.idx : opts[opts.length - 1].idx;
+  populateMonthOptions();
+  onSelectorChange();
+});
+monthSelectEl.addEventListener('change', function(){
+  selectedIdx = +this.value;
+  onSelectorChange();
 });
 updateMonthLabels();
 
@@ -685,8 +716,8 @@ toggleBtns.forEach(function(btn){
     toggleBtns.forEach(function(b){ b.classList.remove('active'); b.setAttribute('aria-selected','false'); });
     btn.classList.add('active'); btn.setAttribute('aria-selected','true');
     currentView = btn.dataset.view;
-    if (currentView === 'upi'){ viewUPI.style.display=''; viewAutopay.style.display='none'; metricToggleEl.style.display=''; monthSelectEl.style.display=''; }
-    else { viewUPI.style.display='none'; viewAutopay.style.display=''; metricToggleEl.style.display='none'; monthSelectEl.style.display='none'; }
+    if (currentView === 'upi'){ viewUPI.style.display=''; viewAutopay.style.display='none'; metricToggleEl.style.display=''; yearSelectEl.style.display=''; monthSelectEl.style.display=''; }
+    else { viewUPI.style.display='none'; viewAutopay.style.display=''; metricToggleEl.style.display='none'; yearSelectEl.style.display='none'; monthSelectEl.style.display='none'; }
   });
 });
 </script>
