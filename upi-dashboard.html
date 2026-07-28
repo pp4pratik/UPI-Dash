@@ -157,7 +157,7 @@
       <p class="section-title">Leaderboard — top 10 apps</p>
       <div class="section-actions"><p class="section-note" id="leaderboardNote">June 2026 · sorted by selected metric</p><button class="mini-btn" data-csv="leaderboard">Download CSV</button></div>
     </div>
-    <div class="card"><div class="table-scroll"><table><thead><tr><th>#</th><th>App</th><th>Volume (Mn)</th><th>Value (₹ Cr)</th><th>Avg ticket (₹)</th><th>Share</th></tr></thead><tbody id="leaderTable"></tbody></table></div></div>
+    <div class="card"><div class="table-scroll"><table><thead><tr><th>#</th><th>App</th><th>Volume (Cr)</th><th>Value (₹ Cr)</th><th>Avg ticket (₹)</th><th>Share</th></tr></thead><tbody id="leaderTable"></tbody></table></div></div>
   </div>
 
   <div class="section">
@@ -173,7 +173,7 @@
       </div>
       <div class="card">
         <div class="section-head"><p class="section-title">Top merchant categories</p><div class="section-actions"><p class="section-note" id="categoriesNote">June 2026</p><button class="mini-btn" data-csv="category">CSV</button></div></div>
-        <div class="table-scroll"><table><thead><tr><th>Category</th><th id="catVolHead">Volume (Mn)</th><th id="catValHead">Value (₹ Cr)</th></tr></thead><tbody id="categoryTable"></tbody></table></div>
+        <div class="table-scroll"><table><thead><tr><th>Category</th><th id="catVolHead">Volume (Cr)</th><th id="catValHead">Value (₹ Cr)</th></tr></thead><tbody id="categoryTable"></tbody></table></div>
       </div>
     </div>
   </div>
@@ -229,15 +229,15 @@
       <div class="hero-grid">
         <div>
           <p class="hero-label">May 2026 · mandate executions (top remitter banks)</p>
-          <p class="hero-value">2.10<span>B</span></p>
+          <p class="hero-value">210<span> Cr</span></p>
           <p class="hero-sub">recurring debits processed across the top 20 remitter banks</p>
-          <div class="chips"><span class="chip up">~102M new registrations, May 2026</span></div>
+          <div class="chips"><span class="chip up">~10.2 Cr new registrations, May 2026</span></div>
         </div>
         <div><svg class="pulse-svg" viewBox="0 0 400 90" preserveAspectRatio="none"><polyline points="0,75 60,72 100,68 140,58 180,50 220,42 260,35 300,28 340,20 400,10" fill="none" stroke="#3FC1A8" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/></svg></div>
       </div>
     </div>
     <div class="kpi-strip four">
-      <div class="kpi"><p class="kpi-label">Registrations, May 2026</p><p class="kpi-value">101.8M</p><p class="kpi-sub">across 13 payer PSPs</p></div>
+      <div class="kpi"><p class="kpi-label">Registrations, May 2026</p><p class="kpi-value">10.18 Cr</p><p class="kpi-sub">across 13 payer PSPs</p></div>
       <div class="kpi"><p class="kpi-label">Weighted approval rate</p><p class="kpi-value">~24.4%</p><p class="kpi-sub">of execution attempts</p></div>
       <div class="kpi"><p class="kpi-label">Weighted business decline</p><p class="kpi-value">~74.9%</p><p class="kpi-sub">insufficient balance & similar</p></div>
       <div class="kpi"><p class="kpi-label">Weighted technical decline</p><p class="kpi-value">~0.7%</p><p class="kpi-sub">bank/NPCI system issues</p></div>
@@ -300,7 +300,7 @@
         </div>
         <div class="card">
           <div class="section-head"><p class="section-title">Transactions by channel</p><div class="section-actions"><p class="section-note" id="rbiChannelNote">June 2026</p><button class="mini-btn" data-csv="rbiChannel">CSV</button></div></div>
-          <div class="table-scroll"><table><thead><tr><th>Channel</th><th>Volume (Mn)</th><th>Value (₹ Cr)</th><th>Avg ticket (₹)</th></tr></thead><tbody id="rbiChannelTable"></tbody></table></div>
+          <div class="table-scroll"><table><thead><tr><th>Channel</th><th>Volume (Cr)</th><th>Value (₹ Cr)</th><th>Avg ticket (₹)</th></tr></thead><tbody id="rbiChannelTable"></tbody></table></div>
         </div>
       </div>
     </div>
@@ -308,7 +308,7 @@
     <div class="footer">
       <p class="footer-title">Source</p>
       <div class="sources"><a href="https://rbi.org.in/Scripts/Statistics.aspx" target="_blank" rel="noopener">RBI — Bank-wise ATM/POS/Card Statistics</a></div>
-      <p class="disclaimer">National totals aggregated from the "Total" row of RBI's monthly Bank-wise ATM/POS/Card Statistics release, Jan 2025 – Jun 2026. This is a separate RBI data bucket, distinct from NPCI's UPI figures above — card infrastructure, cards outstanding, and card transaction volumes are not part of UPI. Values are converted from RBI's native Rs'000 to ₹ Crore; cards/ATMs/PoS terminals are as-on-month-end stock counts, not monthly flows. RBI states the data is provisional and subject to revision.</p>
+      <p class="disclaimer">National totals aggregated from the "Total" row of RBI's monthly Bank-wise ATM/POS/Card Statistics release, Jan 2025 – Jun 2026. This is a separate RBI data bucket, distinct from NPCI's UPI figures above — card infrastructure, cards outstanding, and card transaction volumes are not part of UPI. Values and counts are converted from RBI's native Rs'000/raw actuals to Crore, so every figure on this dashboard (UPI, UPI AutoPay, and RBI Cards) shares the same Crore unit; cards/ATMs/PoS terminals are as-on-month-end stock counts, not monthly flows. RBI states the data is provisional and subject to revision.</p>
     </div>
 
   </div>
@@ -363,7 +363,7 @@ var selectedIdx = latestIdx; // driven by the month selector; used by leaderboar
 
 function appVolShare(n){ return appData[n].vol[selectedIdx]/monthTotalVol[selectedIdx]*100; }
 function appValShare(n){ return appData[n].val[selectedIdx]/monthTotalVal[selectedIdx]*100; }
-function appTicket(n,q){ return appData[n].val[q]/appData[n].vol[q]*10; }
+function appTicket(n,q){ return appData[n].val[q]/appData[n].vol[q]; }
 
 function sortedApps(){
   return appNames.filter(function(n){ return appData[n].vol[selectedIdx] > 0; }).sort(function(a,b){
@@ -378,23 +378,21 @@ var trendChart, quarterChart;
 function renderTrendChart(){
   var ctx = document.getElementById('trendChart');
   if (trendChart) trendChart.destroy();
-  var volB = mVol.map(function(v){return v==null?null:v/1000;});
-  var valL = mVal.map(function(v){return v==null?null:v/100000;});
   trendChart = new Chart(ctx, {
     data:{ labels:months, datasets:[
-      { type:'bar', label:'Volume (B txns)', data:volB, backgroundColor: metric==='volume'?'#F5A524':'rgba(245,165,36,0.35)', borderRadius:3, yAxisID:'y', order:2, barThickness:10 },
-      { type:'line', label:'Value (₹L cr)', data:valL, borderColor: metric==='value'?'#3FC1A8':'rgba(63,193,168,0.45)', backgroundColor:'#3FC1A8', pointRadius:0, borderWidth:2, tension:0.3, yAxisID:'y1', order:1, spanGaps:true }
+      { type:'bar', label:'Volume (Cr txns)', data:mVol, backgroundColor: metric==='volume'?'#F5A524':'rgba(245,165,36,0.35)', borderRadius:3, yAxisID:'y', order:2, barThickness:10 },
+      { type:'line', label:'Value (₹ Cr)', data:mVal, borderColor: metric==='value'?'#3FC1A8':'rgba(63,193,168,0.45)', backgroundColor:'#3FC1A8', pointRadius:0, borderWidth:2, tension:0.3, yAxisID:'y1', order:1, spanGaps:true }
     ]},
     options:{ responsive:true, maintainAspectRatio:false, interaction:{mode:'index',intersect:false},
       scales:{ x:{grid:{display:false},ticks:{autoSkip:true,maxTicksLimit:13,maxRotation:0,font:{size:10}}},
-        y:{position:'left',title:{display:true,text:'Volume (B)',font:{size:11}},grid:{color:'rgba(255,255,255,0.06)'}},
-        y1:{position:'right',title:{display:true,text:'Value (₹L cr)',font:{size:11}},grid:{display:false}} },
+        y:{position:'left',title:{display:true,text:'Volume (Cr)',font:{size:11}},grid:{color:'rgba(255,255,255,0.06)'},ticks:{callback:function(v){return v.toLocaleString('en-IN');}}},
+        y1:{position:'right',title:{display:true,text:'Value (₹ Cr)',font:{size:11}},grid:{display:false},ticks:{callback:function(v){return v.toLocaleString('en-IN');}}} },
       plugins:{legend:{display:false}} }
   });
 }
 
 function renderTrendRaw(){
-  var rows = '<tr><th>Month</th><th>Volume (Mn)</th><th>MoM %</th><th>YoY %</th><th>Value (Cr)</th><th>MoM %</th><th>YoY %</th></tr>';
+  var rows = '<tr><th>Month</th><th>Volume (Cr)</th><th>MoM %</th><th>YoY %</th><th>Value (Cr)</th><th>MoM %</th><th>YoY %</th></tr>';
   var html = '<table><thead>'+rows+'</thead><tbody>';
   for (var i=0;i<months.length;i++){
     html += '<tr><td class="name">'+months[i]+'</td><td>'+(mVol[i]!=null?mVol[i].toLocaleString('en-IN'):'—')+'</td><td>'+fmtPct(mom(mVol,i))+'</td><td>'+fmtPct(yoy(mVol,i))+'</td>'+
@@ -446,7 +444,7 @@ function renderP2P(){
     p2pCharts[id] = new Chart(document.getElementById(id), { type:'doughnut', data:{labels:['P2M','P2P'],datasets:[{data:data,backgroundColor:['#F5A524','#3FC1A8'],borderColor:'#111C2B',borderWidth:2}]},
       options:{responsive:true,maintainAspectRatio:false,cutout:'58%',plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return c.label+': '+c.raw+'%';}}}}} });
   });
-  var p2pTicket = d.p2pVal/d.p2pVol*10, p2mTicket = d.p2mVal/d.p2mVol*10;
+  var p2pTicket = d.p2pVal/d.p2pVol, p2mTicket = d.p2mVal/d.p2mVol;
   document.getElementById('p2pTicketRow').innerHTML =
     '<span><i style="background:#3FC1A8"></i>P2P avg ticket: ₹'+p2pTicket.toFixed(0)+'</span>' +
     '<span><i style="background:#F5A524"></i>P2M avg ticket: ₹'+p2mTicket.toFixed(0)+'</span>';
@@ -508,7 +506,8 @@ var geographyByMonth = [
 ];
 // ---------- RAW DATA: RBI Cards (national totals, Jan 2025 - Jun 2026) — separate bucket, not UPI ----------
 // Source: rbi.org.in Data Releases > Bank-wise ATM/POS/Card Statistics, monthly "Total" row.
-// Volumes converted from RBI's raw actuals to Mn; values converted from Rs'000 to ₹ Cr.
+// Embedded here in RBI's native units (raw actuals / Rs'000→Cr); the normalization block below
+// further converts volumes/counts to Crore so every figure on this dashboard shares one unit.
 var rbiAtms = [216706,216836,214841,213791,215971,209970,208063,207019,206711,207377,207796,207485,207915,208834,209331,209983,210114,209733];
 var rbiPos = [10352730,10717514,11098051,11283266,11581161,11782954,11913080,11964613,12116102,12308241,11253425,11474672,11545210,11664877,11769361,11447440,11525276,9922126];
 var rbiMicroAtm = [1473899,1467966,1481883,1473668,1478043,1459218,1466668,1471422,1459945,1464566,1427193,1414547,1391526,1389518,1389878,1367989,1358241,1336732];
@@ -535,6 +534,21 @@ var rbiTxnByMonth = [
   {cPos:{vol:285.5645, val:74262.0678}, cOnl:{vol:292.0768, val:126999.4646}, cOth:{vol:3.6178, val:100.1415}, cAtm:{vol:0.6304, val:356.5215}, dPos:{vol:71.2563, val:21691.8581}, dOnl:{vol:25.7595, val:13398.2406}, dOth:{vol:0.0772, val:208.4696}, dAtm:{vol:398.4288, val:216358.5427}, dPosW:{vol:0.0068, val:1.2272}}
 ];
 
+// ---------- Normalize every Volume/count figure to Crore (1 Cr = 10 Mn = 1e7), one time, so it matches
+// Value figures (already in Cr) across UPI, UPI AutoPay and RBI Cards. Data above is embedded/regenerated
+// in each source's native unit (NPCI: Mn; RBI: raw actuals) — this is the single place that converts it.
+mVol = mVol.map(function(v){ return v==null?null:v/10; });
+monthTotalVol = monthTotalVol.map(function(v){ return v/10; });
+Object.keys(appData).forEach(function(n){ appData[n].vol = appData[n].vol.map(function(v){ return v/10; }); });
+p2pData.forEach(function(d){ d.p2pVol = d.p2pVol/10; d.p2mVol = d.p2mVol/10; });
+categoriesByMonth.forEach(function(monthCats){ monthCats.forEach(function(c){ c.vol = c.vol/10; }); });
+rbiAtms = rbiAtms.map(function(v){ return v/1e7; });
+rbiPos = rbiPos.map(function(v){ return v/1e7; });
+rbiMicroAtm = rbiMicroAtm.map(function(v){ return v/1e7; });
+rbiCreditCards = rbiCreditCards.map(function(v){ return v/10; });
+rbiDebitCards = rbiDebitCards.map(function(v){ return v/10; });
+rbiTxnByMonth.forEach(function(t){ Object.keys(t).forEach(function(k){ t[k].vol = t[k].vol/10; }); });
+
 function renderGeo(){
   var granularity = geoGranularity[selectedIdx];
   var geo = geographyByMonth[selectedIdx].slice();
@@ -559,17 +573,17 @@ function renderGeo(){
 function renderQuarter(){
   var top5 = ['PhonePe','Google Pay','Paytm','Navi','super.money'];
   var datasets = top5.map(function(n){
-    var d = metric==='volume' ? appData[n].vol.map(function(v){return v/1000;}) : appData[n].val.map(function(v){return v/100000;});
+    var d = metric==='volume' ? appData[n].vol : appData[n].val;
     return {label:n, data:d, borderColor:appColors[n], backgroundColor:appColors[n], tension:0.3};
   });
   if (quarterChart) quarterChart.destroy();
   quarterChart = new Chart(document.getElementById('quarterChart'), { type:'line', data:{labels:allMonths, datasets:datasets},
-    options:{ responsive:true, maintainAspectRatio:false, scales:{x:{grid:{display:false}},y:{title:{display:true,text:metric==='volume'?'Volume (B)':'Value (₹L cr)',font:{size:11}},grid:{color:'rgba(255,255,255,0.06)'}}},
+    options:{ responsive:true, maintainAspectRatio:false, scales:{x:{grid:{display:false}},y:{title:{display:true,text:metric==='volume'?'Volume (Cr)':'Value (₹ Cr)',font:{size:11}},grid:{color:'rgba(255,255,255,0.06)'}}},
       plugins:{legend:{display:true,position:'bottom',labels:{boxWidth:10,font:{size:11}}}} } });
 }
 
 function renderQuarterRaw(){
-  var html = '<table><thead><tr><th>App</th>' + allMonths.map(function(m){return '<th>'+m+' Vol(Mn)</th>';}).join('') + allMonths.map(function(m){return '<th>'+m+' Val(Cr)</th>';}).join('') + '</tr></thead><tbody>';
+  var html = '<table><thead><tr><th>App</th>' + allMonths.map(function(m){return '<th>'+m+' Vol(Cr)</th>';}).join('') + allMonths.map(function(m){return '<th>'+m+' Val(Cr)</th>';}).join('') + '</tr></thead><tbody>';
   appNames.forEach(function(n){
     var d=appData[n];
     html += '<tr><td class="name">'+n+'</td>' + d.vol.map(function(v){return '<td>'+v.toLocaleString('en-IN')+'</td>';}).join('') + d.val.map(function(v){return '<td>'+v.toLocaleString('en-IN')+'</td>';}).join('') + '</tr>';
@@ -604,8 +618,8 @@ function renderRBIInfraChart(){
     ]},
     options:{ responsive:true, maintainAspectRatio:false, interaction:{mode:'index',intersect:false},
       scales:{ x:{grid:{display:false},ticks:{autoSkip:true,maxTicksLimit:9,font:{size:10}}},
-        y:{position:'left',title:{display:true,text:'ATMs & CRMs',font:{size:11}},grid:{color:'rgba(255,255,255,0.06)'}},
-        y1:{position:'right',title:{display:true,text:'PoS / Micro ATMs',font:{size:11}},grid:{display:false}} },
+        y:{position:'left',title:{display:true,text:'ATMs & CRMs (Cr)',font:{size:11}},grid:{color:'rgba(255,255,255,0.06)'}},
+        y1:{position:'right',title:{display:true,text:'PoS / Micro ATMs (Cr)',font:{size:11}},grid:{display:false}} },
       plugins:{legend:{display:true,position:'bottom',labels:{boxWidth:10,font:{size:11}}}} } });
 }
 
@@ -613,13 +627,13 @@ function renderRBICardsChart(){
   if (rbiCardsChart) rbiCardsChart.destroy();
   rbiCardsChart = new Chart(document.getElementById('rbiCardsChart'), { type:'line',
     data:{ labels:allMonths, datasets:[
-      {label:'Credit cards (Mn)', data:rbiCreditCards, borderColor:'#F5A524', backgroundColor:'#F5A524', pointRadius:2, borderWidth:2, tension:0.3},
-      {label:'Debit cards (Mn)', data:rbiDebitCards, borderColor:'#3FC1A8', backgroundColor:'#3FC1A8', pointRadius:2, borderWidth:2, tension:0.3, yAxisID:'y1'}
+      {label:'Credit cards (Cr)', data:rbiCreditCards, borderColor:'#F5A524', backgroundColor:'#F5A524', pointRadius:2, borderWidth:2, tension:0.3},
+      {label:'Debit cards (Cr)', data:rbiDebitCards, borderColor:'#3FC1A8', backgroundColor:'#3FC1A8', pointRadius:2, borderWidth:2, tension:0.3, yAxisID:'y1'}
     ]},
     options:{ responsive:true, maintainAspectRatio:false, interaction:{mode:'index',intersect:false},
       scales:{ x:{grid:{display:false},ticks:{autoSkip:true,maxTicksLimit:9,font:{size:10}}},
-        y:{position:'left',title:{display:true,text:'Credit cards (Mn)',font:{size:11}},grid:{color:'rgba(255,255,255,0.06)'}},
-        y1:{position:'right',title:{display:true,text:'Debit cards (Mn)',font:{size:11}},grid:{display:false}} },
+        y:{position:'left',title:{display:true,text:'Credit cards (Cr)',font:{size:11}},grid:{color:'rgba(255,255,255,0.06)'}},
+        y1:{position:'right',title:{display:true,text:'Debit cards (Cr)',font:{size:11}},grid:{display:false}} },
       plugins:{legend:{display:true,position:'bottom',labels:{boxWidth:10,font:{size:11}}}} } });
 }
 
@@ -656,19 +670,19 @@ function renderRBIChannelTable(){
   rows.sort(function(a,b){ return metric==='volume' ? b.vol-a.vol : b.val-a.val; });
   var html = '';
   rows.forEach(function(r){
-    var ticket = r.val/r.vol*10;
-    html += '<tr><td class="name">'+RBI_CHANNEL_LABELS[r.key]+'</td><td>'+r.vol.toLocaleString('en-IN',{maximumFractionDigits:2})+'</td><td>'+r.val.toLocaleString('en-IN',{maximumFractionDigits:0})+'</td><td>₹'+(isFinite(ticket)?ticket.toFixed(0):'—')+'</td></tr>';
+    var ticket = r.val/r.vol;
+    html += '<tr><td class="name">'+RBI_CHANNEL_LABELS[r.key]+'</td><td>'+r.vol.toLocaleString('en-IN',{maximumFractionDigits:4})+'</td><td>'+r.val.toLocaleString('en-IN',{maximumFractionDigits:0})+'</td><td>₹'+(isFinite(ticket)?ticket.toFixed(0):'—')+'</td></tr>';
   });
   document.getElementById('rbiChannelTable').innerHTML = html;
   document.getElementById('rbiChannelNote').textContent = allMonthsFull[selectedIdx];
   window._rbiChannelRows = rows;
 }
 
-function fmtCardCount(mn){ return mn>=1000 ? (mn/1000).toFixed(2)+'B' : mn.toFixed(1)+'M'; }
+function fmtCardCount(cr){ return cr.toFixed(2)+' Cr'; }
 
 function renderRBIKpis(){
-  document.getElementById('rbiAtmsKpi').textContent = rbiAtms[selectedIdx].toLocaleString('en-IN');
-  document.getElementById('rbiPosKpi').textContent = (rbiPos[selectedIdx]/1e6).toFixed(1)+'M';
+  document.getElementById('rbiAtmsKpi').textContent = rbiAtms[selectedIdx].toFixed(4)+' Cr';
+  document.getElementById('rbiPosKpi').textContent = rbiPos[selectedIdx].toFixed(2)+' Cr';
   document.getElementById('rbiCreditKpi').textContent = fmtCardCount(rbiCreditCards[selectedIdx]);
   document.getElementById('rbiDebitKpi').textContent = fmtCardCount(rbiDebitCards[selectedIdx]);
 }
@@ -734,13 +748,15 @@ document.getElementById('circularSearch').addEventListener('input', function(e){
 function renderAutoPay(){
   var regLabels=['Yes Bank','Axis Bank','ICICI Bank','SBI','HDFC Bank','BHIM','Others'];
   var regData=[45.65,21.53,16.76,9.71,7.1,0.63,0.38];
-  new Chart(document.getElementById('regChart'), {type:'bar',data:{labels:regLabels,datasets:[{label:'Registrations (Mn)',data:regData,backgroundColor:'#3FC1A8',borderRadius:4}]},
-    options:{responsive:true,maintainAspectRatio:false,scales:{x:{grid:{display:false}},y:{grid:{color:'rgba(255,255,255,0.06)'},title:{display:true,text:'Millions',font:{size:11}}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return c.raw+'M';}}}}}});
+  var regDataCr = regData.map(function(v){ return v/10; });
+  new Chart(document.getElementById('regChart'), {type:'bar',data:{labels:regLabels,datasets:[{label:'Registrations (Cr)',data:regDataCr,backgroundColor:'#3FC1A8',borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,scales:{x:{grid:{display:false}},y:{grid:{color:'rgba(255,255,255,0.06)'},title:{display:true,text:'Crore',font:{size:11}}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return c.raw.toFixed(2)+' Cr';}}}}}});
   var execLabels=['SBI','Airtel PB','Bank of Baroda','India Post PB','Union Bank','PNB','Kotak','HDFC','Canara','Indian Bank'];
   var execData=[518.33,178.2,167.35,136.56,135.28,129.03,121.9,113.7,98.97,80.84];
-  new Chart(document.getElementById('execChart'), {type:'bar',data:{labels:execLabels,datasets:[{label:'Executions (Mn)',data:execData,backgroundColor:'#F5A524',borderRadius:4}]},
-    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,scales:{x:{grid:{color:'rgba(255,255,255,0.06)'},title:{display:true,text:'Millions',font:{size:11}}},y:{grid:{display:false}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return c.raw+'M';}}}}}});
-  window._regLabels=regLabels; window._regData=regData; window._execLabels=execLabels; window._execData=execData;
+  var execDataCr = execData.map(function(v){ return v/10; });
+  new Chart(document.getElementById('execChart'), {type:'bar',data:{labels:execLabels,datasets:[{label:'Executions (Cr)',data:execDataCr,backgroundColor:'#F5A524',borderRadius:4}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,scales:{x:{grid:{color:'rgba(255,255,255,0.06)'},title:{display:true,text:'Crore',font:{size:11}}},y:{grid:{display:false}}},plugins:{legend:{display:false},tooltip:{callbacks:{label:function(c){return c.raw.toFixed(2)+' Cr';}}}}}});
+  window._regLabels=regLabels; window._regData=regDataCr; window._execLabels=execLabels; window._execData=execDataCr;
 }
 
 function renderAll(){
@@ -823,19 +839,19 @@ document.querySelectorAll('[data-csv]').forEach(function(btn){
   btn.addEventListener('click', function(){
     var key = btn.dataset.csv, rows=[];
     if (key==='trend'){
-      rows.push(['Month','Volume (Mn)','MoM %','YoY %','Value (Cr)','MoM %','YoY %']);
+      rows.push(['Month','Volume (Cr)','MoM %','YoY %','Value (Cr)','MoM %','YoY %']);
       for (var i=0;i<months.length;i++){ rows.push([months[i], mVol[i]||'', mom(mVol,i)||'', yoy(mVol,i)||'', mVal[i]||'', mom(mVal,i)||'', yoy(mVal,i)||'']); }
     } else if (key==='leaderboard'){
-      rows.push(['Rank','App','Volume (Mn)','Value (Cr)','Avg ticket (Rs)','Share %']);
+      rows.push(['Rank','App','Volume (Cr)','Value (Cr)','Avg ticket (Rs)','Share %']);
       sortedApps().forEach(function(n,i){ rows.push([i+1,n,appData[n].vol[selectedIdx],appData[n].val[selectedIdx],appTicket(n,selectedIdx).toFixed(0), (metric==='volume'?appVolShare(n):appValShare(n)).toFixed(2)]); });
     } else if (key==='category'){
-      rows.push(['Category','Volume (Mn)','Value (Cr)']);
+      rows.push(['Category','Volume (Cr)','Value (Cr)']);
       (window._categories||[]).forEach(function(c){ rows.push([c.name,c.vol,c.val]); });
     } else if (key==='geo'){
       rows.push([geoGranularity[selectedIdx],'Volume Share %','Value Share %']);
       (window._geo||[]).forEach(function(g){ rows.push([g.name,g.vol,g.val]); });
     } else if (key==='quarter'){
-      rows.push(['App'].concat(allMonths.map(function(m){return m+' Vol(Mn)';})).concat(allMonths.map(function(m){return m+' Val(Cr)';})));
+      rows.push(['App'].concat(allMonths.map(function(m){return m+' Vol(Cr)';})).concat(allMonths.map(function(m){return m+' Val(Cr)';})));
       appNames.forEach(function(n){ var d=appData[n]; rows.push([n].concat(d.vol).concat(d.val)); });
     } else if (key==='ticket'){
       rows.push(['App','Avg ticket size (Rs)']);
@@ -846,20 +862,20 @@ document.querySelectorAll('[data-csv]').forEach(function(btn){
       rows.push(['Reference','FY','Title','PDF URL']);
       circulars.forEach(function(c){ rows.push([c.ref,c.fy,c.title,c.pdf||'']); });
     } else if (key==='autopayReg'){
-      rows.push(['PSP','Registrations (Mn)']);
+      rows.push(['PSP','Registrations (Cr)']);
       window._regLabels.forEach(function(l,i){ rows.push([l, window._regData[i]]); });
     } else if (key==='autopayExec'){
-      rows.push(['Bank','Executions (Mn)']);
+      rows.push(['Bank','Executions (Cr)']);
       window._execLabels.forEach(function(l,i){ rows.push([l, window._execData[i]]); });
     } else if (key==='rbiInfra'){
       rows.push(['Month','ATMs & CRMs','PoS Terminals','Micro ATMs']);
       for (var ri=0;ri<allMonths.length;ri++){ rows.push([allMonths[ri], rbiAtms[ri], rbiPos[ri], rbiMicroAtm[ri]]); }
     } else if (key==='rbiCardsOutstanding'){
-      rows.push(['Month','Credit Cards (Mn)','Debit Cards (Mn)']);
+      rows.push(['Month','Credit Cards (Cr)','Debit Cards (Cr)']);
       for (var rj=0;rj<allMonths.length;rj++){ rows.push([allMonths[rj], rbiCreditCards[rj], rbiDebitCards[rj]]); }
     } else if (key==='rbiChannel'){
-      rows.push(['Channel','Volume (Mn)','Value (Cr)','Avg ticket (Rs)']);
-      (window._rbiChannelRows||[]).forEach(function(r){ rows.push([RBI_CHANNEL_LABELS[r.key], r.vol, r.val, (r.val/r.vol*10).toFixed(0)]); });
+      rows.push(['Channel','Volume (Cr)','Value (Cr)','Avg ticket (Rs)']);
+      (window._rbiChannelRows||[]).forEach(function(r){ rows.push([RBI_CHANNEL_LABELS[r.key], r.vol, r.val, (r.val/r.vol).toFixed(0)]); });
     }
     downloadCSV('upi-pulse-'+key+'.csv', rows);
   });
@@ -870,9 +886,9 @@ var currentView = 'upi';
 document.getElementById('downloadAllBtn').addEventListener('click', function(){
   if (currentView === 'autopay'){
     var apRows = [['UPI AutoPay — full data export'],['Source: NPCI AutoPay Ecosystem Statistics, pulled 28 Jul 2026'],[]];
-    apRows.push(['REGISTRATIONS BY PSP']); apRows.push(['PSP','Registrations (Mn)']);
+    apRows.push(['REGISTRATIONS BY PSP']); apRows.push(['PSP','Registrations (Cr)']);
     window._regLabels.forEach(function(l,i){ apRows.push([l, window._regData[i]]); });
-    apRows.push([]); apRows.push(['EXECUTION VOLUME BY REMITTER BANK']); apRows.push(['Bank','Executions (Mn)']);
+    apRows.push([]); apRows.push(['EXECUTION VOLUME BY REMITTER BANK']); apRows.push(['Bank','Executions (Cr)']);
     window._execLabels.forEach(function(l,i){ apRows.push([l, window._execData[i]]); });
     downloadCSV('upi-pulse-autopay-full-data.csv', apRows);
     return;
@@ -881,17 +897,17 @@ document.getElementById('downloadAllBtn').addEventListener('click', function(){
     var rbiRows = [['RBI Cards — full data export'],['Source: RBI Bank-wise ATM/POS/Card Statistics, monthly Total row'],[]];
     rbiRows.push(['INFRASTRUCTURE']); rbiRows.push(['Month','ATMs & CRMs','PoS Terminals','Micro ATMs']);
     for (var rk=0;rk<allMonths.length;rk++){ rbiRows.push([allMonths[rk], rbiAtms[rk], rbiPos[rk], rbiMicroAtm[rk]]); }
-    rbiRows.push([]); rbiRows.push(['CARDS OUTSTANDING']); rbiRows.push(['Month','Credit Cards (Mn)','Debit Cards (Mn)']);
+    rbiRows.push([]); rbiRows.push(['CARDS OUTSTANDING']); rbiRows.push(['Month','Credit Cards (Cr)','Debit Cards (Cr)']);
     for (var rl=0;rl<allMonths.length;rl++){ rbiRows.push([allMonths[rl], rbiCreditCards[rl], rbiDebitCards[rl]]); }
-    rbiRows.push([]); rbiRows.push(['TRANSACTIONS BY CHANNEL ('+allMonths[selectedIdx]+')']); rbiRows.push(['Channel','Volume (Mn)','Value (Cr)','Avg ticket (Rs)']);
-    (window._rbiChannelRows||[]).forEach(function(r){ rbiRows.push([RBI_CHANNEL_LABELS[r.key], r.vol, r.val, (r.val/r.vol*10).toFixed(0)]); });
+    rbiRows.push([]); rbiRows.push(['TRANSACTIONS BY CHANNEL ('+allMonths[selectedIdx]+')']); rbiRows.push(['Channel','Volume (Cr)','Value (Cr)','Avg ticket (Rs)']);
+    (window._rbiChannelRows||[]).forEach(function(r){ rbiRows.push([RBI_CHANNEL_LABELS[r.key], r.vol, r.val, (r.val/r.vol).toFixed(0)]); });
     downloadCSV('upi-pulse-rbi-cards-full-data.csv', rbiRows);
     return;
   }
   var rows = [['UPI Pulse — full data export'],['Source: NPCI Product & Ecosystem Statistics, pulled 28 Jul 2026'],[]];
-  rows.push(['MONTHLY TREND']); rows.push(['Month','Volume (Mn)','MoM %','YoY %','Value (Cr)','MoM %','YoY %']);
+  rows.push(['MONTHLY TREND']); rows.push(['Month','Volume (Cr)','MoM %','YoY %','Value (Cr)','MoM %','YoY %']);
   for (var i=0;i<months.length;i++){ rows.push([months[i], mVol[i]||'', mom(mVol,i)||'', yoy(mVol,i)||'', mVal[i]||'', mom(mVal,i)||'', yoy(mVal,i)||'']); }
-  rows.push([]); rows.push(['APP LEADERBOARD ('+allMonths[selectedIdx]+')']); rows.push(['App','Volume (Mn)','Value (Cr)','Avg ticket (Rs)']);
+  rows.push([]); rows.push(['APP LEADERBOARD ('+allMonths[selectedIdx]+')']); rows.push(['App','Volume (Cr)','Value (Cr)','Avg ticket (Rs)']);
   sortedApps().forEach(function(n){ rows.push([n, appData[n].vol[selectedIdx], appData[n].val[selectedIdx], appTicket(n,selectedIdx).toFixed(0)]); });
   rows.push([]); rows.push(['CIRCULARS']); rows.push(['Reference','FY','Title','PDF URL']);
   circulars.forEach(function(c){ rows.push([c.ref,c.fy,c.title,c.pdf||'']); });
