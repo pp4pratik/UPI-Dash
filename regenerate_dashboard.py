@@ -79,6 +79,7 @@ statewise = fetch_all("Statewise")
 circulars_raw = fetch_all("Circulars")
 autopay_reg = fetch_all("AutoPay Registrations")
 autopay_exec = fetch_all("AutoPay Executions")
+rbi_cards = fetch_all("RBI Cards")
 
 if not trend:
     print("No Monthly Trend data in Airtable — aborting."); sys.exit(1)
@@ -188,6 +189,47 @@ for m in geo_months:
 geo_granularity_js = "[" + ",".join(f"'{g}'" for g in geo_granularity) + "]"
 geo_js = "[\n" + ",\n".join(geo_month_blocks) + "\n]"
 
+# ---------------- RBI Cards (national totals, Jan 2025 - Jun 2026) — separate bucket, not part of UPI ----------------
+rbi_months = sorted(set(r["Month"] for r in rbi_cards if r["Month"].startswith(SELECTOR_YEARS)), key=month_key)
+if rbi_months != app_months:
+    print(f"NOTE: RBI Cards months {rbi_months} differ from App Stats months {app_months} — selector indices may not line up")
+rbi_by_iso = {r["Month"]: r for r in rbi_cards}
+
+def vol_mn(r, field): return round(r[field] / 1e6, 4)
+def val_cr(r, field): return round(r[field] / 1e4, 4)
+
+rbi_atms = [rbi_by_iso[m]["ATMs Onsite"] + rbi_by_iso[m]["ATMs Offsite"] for m in rbi_months]
+rbi_pos = [rbi_by_iso[m]["PoS Terminals"] for m in rbi_months]
+rbi_microatm = [rbi_by_iso[m]["Micro ATMs"] for m in rbi_months]
+rbi_credit_cards = [vol_mn(rbi_by_iso[m], "Credit Cards Outstanding") for m in rbi_months]
+rbi_debit_cards = [vol_mn(rbi_by_iso[m], "Debit Cards Outstanding") for m in rbi_months]
+
+rbiatms_js = "[" + ",".join(js_num(v) for v in rbi_atms) + "]"
+rbipos_js = "[" + ",".join(js_num(v) for v in rbi_pos) + "]"
+rbimicroatm_js = "[" + ",".join(js_num(v) for v in rbi_microatm) + "]"
+rbicreditcards_js = "[" + ",".join(js_num(v) for v in rbi_credit_cards) + "]"
+rbidebitcards_js = "[" + ",".join(js_num(v) for v in rbi_debit_cards) + "]"
+
+# Column order matches RBI's numbered footnotes 9-26 in the Bank-wise ATM/POS/Card Statistics release.
+RBI_CHANNEL_FIELDS = [
+    ("cPos", "Credit PoS Volume", "Credit PoS Value"),
+    ("cOnl", "Credit Online Volume", "Credit Online Value"),
+    ("cOth", "Credit Others Volume", "Credit Others Value"),
+    ("cAtm", "Credit ATM Withdrawal Volume", "Credit ATM Withdrawal Value"),
+    ("dPos", "Debit PoS Volume", "Debit PoS Value"),
+    ("dOnl", "Debit Online Volume", "Debit Online Value"),
+    ("dOth", "Debit Others Volume", "Debit Others Value"),
+    ("dAtm", "Debit ATM Withdrawal Volume", "Debit ATM Withdrawal Value"),
+    ("dPosW", "Debit PoS Withdrawal Volume", "Debit PoS Withdrawal Value"),
+]
+
+rbi_txn_blocks = []
+for m in rbi_months:
+    r = rbi_by_iso[m]
+    parts = [f"{key}:{{vol:{js_num(vol_mn(r,volf))}, val:{js_num(val_cr(r,valf))}}}" for key, volf, valf in RBI_CHANNEL_FIELDS]
+    rbi_txn_blocks.append("  {" + ", ".join(parts) + "}")
+rbitxnbymonth_js = "[\n" + ",\n".join(rbi_txn_blocks) + "\n]"
+
 # ---------------- Circulars (all rows, newest first) ----------------
 def circular_sort_key(r):
     fy = r.get("FY", "")
@@ -242,6 +284,12 @@ html = replace_var(html, "categoriesByMonth", categoriesbymonth_js, "[", "]")
 html = replace_var(html, "geoGranularity", geo_granularity_js, "[", "]")
 html = replace_var(html, "geographyByMonth", geo_js, "[", "]")
 html = replace_var(html, "circulars", circulars_js, "[", "]")
+html = replace_var(html, "rbiAtms", rbiatms_js, "[", "]")
+html = replace_var(html, "rbiPos", rbipos_js, "[", "]")
+html = replace_var(html, "rbiMicroAtm", rbimicroatm_js, "[", "]")
+html = replace_var(html, "rbiCreditCards", rbicreditcards_js, "[", "]")
+html = replace_var(html, "rbiDebitCards", rbidebitcards_js, "[", "]")
+html = replace_var(html, "rbiTxnByMonth", rbitxnbymonth_js, "[", "]")
 html = re.sub(r"var\s+regLabels\s*=\s*\[.*?\];", f"var regLabels={reg_labels_js};", html, count=1, flags=re.DOTALL)
 html = re.sub(r"var\s+regData\s*=\s*\[.*?\];", f"var regData={reg_data_js};", html, count=1, flags=re.DOTALL)
 html = re.sub(r"var\s+execLabels\s*=\s*\[.*?\];", f"var execLabels={exec_labels_js};", html, count=1, flags=re.DOTALL)
@@ -279,4 +327,4 @@ with open(DASHBOARD_PATH, "w") as f:
     f.write(html)
 
 print("Regeneration complete.")
-print(f"Latest UPI month: {last_month_long} | AutoPay month: {ap_reg_month_long} | Circulars: {circulars_count}")
+print(f"Latest UPI month: {last_month_long} | AutoPay month: {ap_reg_month_long} | Circulars: {circulars_count} | RBI Cards months: {len(rbi_months)}")
