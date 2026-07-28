@@ -291,10 +291,10 @@
     <div class="section">
       <div class="row-2">
         <div class="card">
-          <div class="section-head"><p class="section-title">Credit vs Debit split</p><p class="section-note" id="rbiSplitNote">June 2026</p></div>
+          <div class="section-head"><p class="section-title">Credit vs Debit split — spends</p><p class="section-note" id="rbiSplitNote">June 2026</p></div>
           <div class="p2p-grid">
-            <div><p class="section-note" style="text-align:center;margin:0 0 6px;">By volume</p><div style="position:relative;height:160px;"><canvas id="rbiSplitVolChart" role="img" aria-label="Donut chart of credit vs debit card share of transaction volume"></canvas></div></div>
-            <div><p class="section-note" style="text-align:center;margin:0 0 6px;">By value</p><div style="position:relative;height:160px;"><canvas id="rbiSplitValChart" role="img" aria-label="Donut chart of credit vs debit card share of transaction value"></canvas></div></div>
+            <div><p class="section-note" style="text-align:center;margin:0 0 6px;">By volume</p><div style="position:relative;height:160px;"><canvas id="rbiSplitVolChart" role="img" aria-label="Donut chart of credit vs debit card share of spend volume"></canvas></div></div>
+            <div><p class="section-note" style="text-align:center;margin:0 0 6px;">By value</p><div style="position:relative;height:160px;"><canvas id="rbiSplitValChart" role="img" aria-label="Donut chart of credit vs debit card share of spend value"></canvas></div></div>
           </div>
           <div class="legend"><span><i style="background:#F5A524"></i>Debit</span><span><i style="background:#3FC1A8"></i>Credit</span></div>
         </div>
@@ -354,8 +354,8 @@ var appData = {
   "WhatsApp":{vol:[60.99,58.86,0,67.4,70.19,0,0,0,0,0,87.06,100.45,112.65,112.89,130.74,138.69,150.43,150.48], val:[4550.41,4349.62,0,5065.44,5280.89,0,0,0,0,0,7168.01,7399.16,8358.21,8557.08,9917.41,10498.22,11425.02,11391.85]},
   "CRED":{vol:[137.44,126.48,144.82,134.67,141.95,138.32,144.38,150,147.86,157.99,153.54,157.25,156.86,145.98,163.2,157.51,157.19,141.78], val:[49482.95,45127.72,55091.22,49753,55242.72,51384.11,55259.9,55756.24,54796.41,62438.03,59261.16,59073.03,58840.62,54045.92,62029.55,56569.08,61002.44,55116.79]},
   "Axis Bank Apps":{vol:[126.62,117.7,145.78,120.05,120.03,126.27,123.44,135.14,158.05,113.58,133.63,144.75,152.6,132.11,135.4,125.81,134.2,136.16], val:[7769.17,9197.33,9966.53,9147.64,9683.82,9388.51,9773.39,9812.52,14911.36,15761.25,15515.97,13612.02,13206.89,12157.93,13180.82,10253.66,13185.15,13120.62]},
-  "Amazon Pay":{vol:[99.95,93.31,111.06,98.26,98.68,93.25,100.53,98.98,91.4,91.65,0,0,0,0,0,0,0,0], val:[9843.47,9077.3,10606.66,9966.68,10343.44,9942.48,10813.98,10830.8,10234.84,10710.43,0,0,0,0,0,0,0,0]},
-  "ICICI Bank Apps":{vol:[0,0,67.63,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], val:[0,0,16696.94,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}
+  "ICICI Bank Apps":{vol:[0,0,67.63,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0], val:[0,0,16696.94,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]},
+  "Amazon Pay":{vol:[99.95,93.31,111.06,98.26,98.68,93.25,100.53,98.98,91.4,91.65,0,0,0,0,0,0,0,0], val:[9843.47,9077.3,10606.66,9966.68,10343.44,9942.48,10813.98,10830.8,10234.84,10710.43,0,0,0,0,0,0,0,0]}
 };
 var appNames = Object.keys(appData);
 var latestIdx = allMonths.length - 1; // default selector position (most recent month)
@@ -637,13 +637,14 @@ function renderRBICardsChart(){
       plugins:{legend:{display:true,position:'bottom',labels:{boxWidth:10,font:{size:11}}}} } });
 }
 
+// Spends only — excludes cash withdrawal channels (cAtm, dAtm, dPosW), which are cash-out, not spend.
 function rbiCreditTotal(idx, field){
   var t = rbiTxnByMonth[idx];
-  return t.cPos[field]+t.cOnl[field]+t.cOth[field]+t.cAtm[field];
+  return t.cPos[field]+t.cOnl[field]+t.cOth[field];
 }
 function rbiDebitTotal(idx, field){
   var t = rbiTxnByMonth[idx];
-  return t.dPos[field]+t.dOnl[field]+t.dOth[field]+t.dAtm[field]+t.dPosW[field];
+  return t.dPos[field]+t.dOnl[field]+t.dOth[field];
 }
 
 function renderRBISplit(){
