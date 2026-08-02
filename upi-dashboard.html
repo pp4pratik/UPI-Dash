@@ -793,39 +793,44 @@ function renderRBI(){
   renderRBIInfraChart(); renderRBICardsChart(); renderRBIMonthDependent();
 }
 
-// Flat display order + labels for the three RBI Payments tables. Dash prefixes ("—", "——") show the
-// hierarchy from RBI's own numbered rows (e.g. Credit Cards PoS nests under Credit Cards nests under
-// Card Payments) without building a real tree — matches the flat-table pattern already used for RBI Cards.
+// Fixed hierarchical order + labels for the three RBI Payments tables, matching RBI's own PART I/II/III
+// row nesting (e.g. Credit Cards PoS nests under Credit Cards nests under Card Payments). Each entry is
+// [key, label, depth, isGrandTotal?] — depth drives indentation, isGrandTotal marks the three summary rows
+// (Total Retail/Total/Total Digital Payments) that sit outside the CCIL/RTGS/... category tree, so they
+// get a divider instead of being indented as if they were a child of Paper-based Instruments.
+// IMPORTANT: this table is never sorted by volume/value — sorting would scatter parents from their
+// children and make the indentation meaningless. The Volume/Value toggle only changes which column is
+// emphasized elsewhere (trend chart, split chart); here both columns are always shown side by side.
 var RBIP_SETTLEMENT_META = [
-  ['ccilTotal','CCIL Operated Systems'], ['ccilGovtSecurities','— Govt Securities Clearing'],
-  ['ccilGovtOutright','—— Outright'], ['ccilGovtRepo','—— Repo'], ['ccilGovtTripartyRepo','—— Tri-party Repo'],
-  ['ccilForex','— Forex Clearing'], ['ccilRupeeDerivatives','— Rupee Derivatives'],
-  ['rtgsTotal','RTGS — Credit Transfers'], ['rtgsCustomer','— Customer Transactions'], ['rtgsInterbank','— Interbank Transactions'],
-  ['retailCreditTransfersTotal','Credit Transfers — Retail'], ['aeps','— AePS (Fund Transfers)'], ['apbs','— APBS'],
-  ['imps','— IMPS'], ['nachCr','— NACH Credit'], ['neft','— NEFT'], ['upi','— UPI'],
-  ['debitTransfersTotal','Debit Transfers & Direct Debits'], ['bhimAadhaarPay','— BHIM Aadhaar Pay'],
-  ['nachDr','— NACH Debit'], ['netc','— NETC (linked to bank account)'],
-  ['cardPaymentsTotal','Card Payments'], ['creditCards','— Credit Cards'], ['creditCardsPos','—— PoS based'],
-  ['creditCardsOther','—— Other (incl. online)'], ['debitCards','— Debit Cards'], ['debitCardsPos','—— PoS based'],
-  ['debitCardsOther','—— Other (incl. online)'],
-  ['ppiTotal','Prepaid Payment Instruments'], ['ppiWallets','— Wallets'], ['ppiCards','— Cards'],
-  ['ppiCardsPos','—— PoS based'], ['ppiCardsOther','—— Other (incl. online)'],
-  ['paperTotal','Paper-based Instruments'], ['paperCts','— CTS (NPCI managed)'],
-  ['totalRetailPayments','Total Retail Payments'], ['totalPayments','Total Payments'], ['totalDigitalPayments','Total Digital Payments']
+  ['ccilTotal','CCIL Operated Systems', 0], ['ccilGovtSecurities','Govt Securities Clearing', 1],
+  ['ccilGovtOutright','Outright', 2], ['ccilGovtRepo','Repo', 2], ['ccilGovtTripartyRepo','Tri-party Repo', 2],
+  ['ccilForex','Forex Clearing', 1], ['ccilRupeeDerivatives','Rupee Derivatives', 1],
+  ['rtgsTotal','RTGS (Credit Transfers)', 0], ['rtgsCustomer','Customer Transactions', 1], ['rtgsInterbank','Interbank Transactions', 1],
+  ['retailCreditTransfersTotal','Retail Credit Transfers', 0], ['aeps','AePS (Fund Transfers)', 1], ['apbs','APBS', 1],
+  ['imps','IMPS', 1], ['nachCr','NACH Credit', 1], ['neft','NEFT', 1], ['upi','UPI', 1],
+  ['debitTransfersTotal','Debit Transfers & Direct Debits', 0], ['bhimAadhaarPay','BHIM Aadhaar Pay', 1],
+  ['nachDr','NACH Debit', 1], ['netc','NETC (linked to bank account)', 1],
+  ['cardPaymentsTotal','Card Payments', 0], ['creditCards','Credit Cards', 1], ['creditCardsPos','PoS based', 2],
+  ['creditCardsOther','Other (incl. online)', 2], ['debitCards','Debit Cards', 1], ['debitCardsPos','PoS based', 2],
+  ['debitCardsOther','Other (incl. online)', 2],
+  ['ppiTotal','Prepaid Payment Instruments', 0], ['ppiWallets','Wallets', 1], ['ppiCards','Cards', 1],
+  ['ppiCardsPos','PoS based', 2], ['ppiCardsOther','Other (incl. online)', 2],
+  ['paperTotal','Paper-based Instruments', 0], ['paperCts','CTS (NPCI managed)', 1],
+  ['totalRetailPayments','Total Retail Payments', 0, true], ['totalPayments','Total Payments', 0, true], ['totalDigitalPayments','Total Digital Payments', 0, true]
 ];
 var RBIP_CHANNELS_META = [
-  ['mobilePaymentsTotal','Mobile Payments (app-based)'], ['mobileIntrabank','— Intra-bank'], ['mobileInterbank','— Inter-bank'],
-  ['internetPaymentsTotal','Internet Payments (Netbanking)'], ['internetIntrabank','— Intra-bank'], ['internetInterbank','— Inter-bank'],
-  ['atmCashWithdrawalTotal','Cash Withdrawal at ATMs'], ['atmWithdrawalCredit','— Using Credit Cards'],
-  ['atmWithdrawalDebit','— Using Debit Cards'], ['atmWithdrawalPrepaid','— Using Prepaid Cards'],
-  ['posCashWithdrawalTotal','Cash Withdrawal at PoS'], ['posWithdrawalDebit','— Using Debit Cards'], ['posWithdrawalPrepaid','— Using Prepaid Cards'],
-  ['microAtmWithdrawalTotal','Cash Withdrawal at Micro ATMs'], ['microAtmAeps','— AePS']
+  ['mobilePaymentsTotal','Mobile Payments (app-based)', 0], ['mobileIntrabank','Intra-bank', 1], ['mobileInterbank','Inter-bank', 1],
+  ['internetPaymentsTotal','Internet Payments (Netbanking)', 0], ['internetIntrabank','Intra-bank', 1], ['internetInterbank','Inter-bank', 1],
+  ['atmCashWithdrawalTotal','Cash Withdrawal at ATMs', 0], ['atmWithdrawalCredit','Using Credit Cards', 1],
+  ['atmWithdrawalDebit','Using Debit Cards', 1], ['atmWithdrawalPrepaid','Using Prepaid Cards', 1],
+  ['posCashWithdrawalTotal','Cash Withdrawal at PoS', 0], ['posWithdrawalDebit','Using Debit Cards', 1], ['posWithdrawalPrepaid','Using Prepaid Cards', 1],
+  ['microAtmWithdrawalTotal','Cash Withdrawal at Micro ATMs', 0], ['microAtmAeps','AePS', 1]
 ];
 var RBIP_INFRA_META = [
-  ['cardsTotalCount','Number of Cards'], ['creditCardsCount','— Credit Cards'], ['debitCardsCount','— Debit Cards'],
-  ['ppiTotalCount','Number of PPIs'], ['ppiWalletsCount','— Wallets'], ['ppiCardsCount','— Cards'],
-  ['atmsCrmsCount','ATMs & CRMs'], ['atmsBankOwnedCount','— Bank-owned ATMs & CRMs'], ['atmsWhiteLabelCount','— White Label ATMs'],
-  ['microAtmsCount','Micro ATMs'], ['posTerminalsCount','PoS Terminals'], ['bharatQrCount','Bharat QR'], ['upiQrCount','UPI QR']
+  ['cardsTotalCount','Number of Cards', 0], ['creditCardsCount','Credit Cards', 1], ['debitCardsCount','Debit Cards', 1],
+  ['ppiTotalCount','Number of PPIs', 0], ['ppiWalletsCount','Wallets', 1], ['ppiCardsCount','Cards', 1],
+  ['atmsCrmsCount','ATMs & CRMs', 0], ['atmsBankOwnedCount','Bank-owned ATMs & CRMs', 1], ['atmsWhiteLabelCount','White Label ATMs', 1],
+  ['microAtmsCount','Micro ATMs', 0], ['posTerminalsCount','PoS Terminals', 0], ['bharatQrCount','Bharat QR', 0], ['upiQrCount','UPI QR', 0]
 ];
 
 // Shared by both the trend line chart and the split pie chart, so their rail list/colors can't drift apart.
@@ -877,15 +882,23 @@ function renderRBIPaymentsKpis(){
   document.getElementById('rbipRtgsKpi').textContent = m ? fmtCr(m.rtgsTotal.val) : '—';
 }
 
+function rbipLabelCell(label, depth, isGrandTotal){
+  var style = 'padding-left:'+(depth*18)+'px;' + (depth===0 || isGrandTotal ? 'font-weight:600;' : 'color:var(--text-secondary);');
+  return '<td class="name" style="'+style+'">'+label+'</td>';
+}
+
 function renderRBIPFlatTable(meta, tbodyId){
   var m = rbiPaymentsByMonth[selectedIdx];
   if (!m){ document.getElementById(tbodyId).innerHTML = ''; return []; }
-  var rows = meta.map(function(pair){ return {key:pair[0], label:pair[1], vol:m[pair[0]].vol, val:m[pair[0]].val}; });
-  rows.sort(function(a,b){ return metric==='volume' ? (b.vol||0)-(a.vol||0) : (b.val||0)-(a.val||0); });
+  var rows = meta.map(function(entry){
+    var key=entry[0], label=entry[1], depth=entry[2], isGrandTotal=!!entry[3];
+    return {key:key, label:label, depth:depth, isGrandTotal:isGrandTotal, vol:m[key].vol, val:m[key].val};
+  });
   var html = '';
   rows.forEach(function(r){
     var ticket = r.val/r.vol;
-    html += '<tr><td class="name">'+r.label+'</td><td>'+fmtRbiNum(r.vol,4)+'</td><td>'+fmtRbiNum(r.val,0)+'</td><td>'+(isFinite(ticket)?'₹'+ticket.toFixed(0):'—')+'</td></tr>';
+    var rowStyle = r.isGrandTotal ? ' style="border-top:1px solid var(--border);"' : '';
+    html += '<tr'+rowStyle+'>'+rbipLabelCell(r.label, r.depth, r.isGrandTotal)+'<td>'+fmtRbiNum(r.vol,4)+'</td><td>'+fmtRbiNum(r.val,0)+'</td><td>'+(isFinite(ticket)?'₹'+ticket.toFixed(0):'—')+'</td></tr>';
   });
   document.getElementById(tbodyId).innerHTML = html;
   return rows;
@@ -903,9 +916,9 @@ function renderRBIPaymentsChannelsTable(){
 
 function renderRBIPaymentsInfraTable(){
   var m = rbiPaymentsByMonth[selectedIdx];
-  var rows = RBIP_INFRA_META.map(function(pair){ return {key:pair[0], label:pair[1], count: m ? m[pair[0]] : null}; });
+  var rows = RBIP_INFRA_META.map(function(entry){ return {key:entry[0], label:entry[1], depth:entry[2], count: m ? m[entry[0]] : null}; });
   var html = '';
-  rows.forEach(function(r){ html += '<tr><td class="name">'+r.label+'</td><td>'+fmtRbiNum(r.count,4)+'</td></tr>'; });
+  rows.forEach(function(r){ html += '<tr>'+rbipLabelCell(r.label, r.depth, false)+'<td>'+fmtRbiNum(r.count,4)+'</td></tr>'; });
   document.getElementById('rbipInfraTable').innerHTML = html;
   document.getElementById('rbipInfraNote').textContent = allMonthsFull[selectedIdx];
   window._rbipInfraRows = rows;
