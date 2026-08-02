@@ -115,11 +115,11 @@
 
   <div class="controls-row">
     <div style="display:flex;gap:10px;flex-wrap:wrap;">
-      <div class="toggle" id="viewToggle" role="tablist">
-        <button class="toggle-btn active" data-view="upi" role="tab" aria-selected="true">UPI</button>
-        <button class="toggle-btn" data-view="autopay" role="tab" aria-selected="false">UPI AutoPay</button>
-        <button class="toggle-btn" data-view="rbi" role="tab" aria-selected="false">RBI Cards</button>
-      </div>
+      <select class="month-select" id="viewSelect" aria-label="Select view">
+        <option value="upi">UPI</option>
+        <option value="autopay">UPI AutoPay</option>
+        <option value="rbi">RBI Cards</option>
+      </select>
       <div class="toggle" id="metricToggle" role="tablist">
         <button class="toggle-btn active metric" data-metric="volume" role="tab" aria-selected="true">Volume</button>
         <button class="toggle-btn" data-metric="value" role="tab" aria-selected="false">Value</button>
@@ -956,7 +956,7 @@ document.getElementById('downloadAllBtn').addEventListener('click', function(){
   downloadCSV('upi-pulse-full-data.csv', rows);
 });
 
-var toggleBtns = document.querySelectorAll('#viewToggle .toggle-btn');
+var viewSelectEl = document.getElementById('viewSelect');
 var viewUPI = document.getElementById('viewUPI');
 var viewAutopay = document.getElementById('viewAutopay');
 var viewRBI = document.getElementById('viewRBI');
@@ -966,17 +966,13 @@ var VIEW_PANELS = {upi: viewUPI, autopay: viewAutopay, rbi: viewRBI};
 // Cards both share the same Jan 2025 - Jun 2026 timeline via the year/month selector, so any future view
 // added to VIEW_PANELS gets the selector by default unless it's named here as a snapshot-style exception.
 var VIEWS_WITHOUT_SELECTOR = {autopay: true};
-toggleBtns.forEach(function(btn){
-  btn.addEventListener('click', function(){
-    toggleBtns.forEach(function(b){ b.classList.remove('active'); b.setAttribute('aria-selected','false'); });
-    btn.classList.add('active'); btn.setAttribute('aria-selected','true');
-    currentView = btn.dataset.view;
-    Object.keys(VIEW_PANELS).forEach(function(v){ VIEW_PANELS[v].style.display = (v===currentView) ? '' : 'none'; });
-    var showSelector = !VIEWS_WITHOUT_SELECTOR[currentView];
-    metricToggleEl.style.display = showSelector ? '' : 'none';
-    yearSelectEl.style.display = showSelector ? '' : 'none';
-    monthSelectEl.style.display = showSelector ? '' : 'none';
-  });
+viewSelectEl.addEventListener('change', function(){
+  currentView = viewSelectEl.value;
+  Object.keys(VIEW_PANELS).forEach(function(v){ VIEW_PANELS[v].style.display = (v===currentView) ? '' : 'none'; });
+  var showSelector = !VIEWS_WITHOUT_SELECTOR[currentView];
+  metricToggleEl.style.display = showSelector ? '' : 'none';
+  yearSelectEl.style.display = showSelector ? '' : 'none';
+  monthSelectEl.style.display = showSelector ? '' : 'none';
 });
 </script>
 </body>
