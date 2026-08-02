@@ -1,7 +1,7 @@
 import json, os, re, sys, urllib.request
 from datetime import date
 
-PROJECT_DIR = "/Users/pratikpujara/Downloads/Dev & Scripts/Chrome Downloads"
+PROJECT_DIR = "/Users/pratikpujara/Downloads/Dev & Scripts/UPI-Dash"
 DASHBOARD_PATH = os.path.join(PROJECT_DIR, "upi-dashboard.html")
 
 with open(os.path.join(PROJECT_DIR, ".env")) as f:
@@ -244,6 +244,75 @@ for m in app_months:
     rbi_txn_blocks.append("  {" + ", ".join(parts) + "}")
 rbitxnbymonth_js = "[\n" + ",\n".join(rbi_txn_blocks) + "\n]"
 
+# ---------------- RBI Payments (Payment System Indicators, national totals, Jan 2025 - Jun 2026) ----------------
+# Source: rbi.org.in Payment System Indicators monthly release — current-month column only. RBI already
+# publishes Volume in lakh and Value in ₹ crore, so vol needs lakh->Cr (÷100) and val needs no conversion.
+# Same null-safe pattern as RBI Cards: built against app_months so arrays are always len(app_months) long.
+rbi_payments = fetch_all("RBI Payments")
+rbip_by_iso = {r["Month"]: r for r in rbi_payments}
+missing_rbip_months = [m for m in app_months if m not in rbip_by_iso]
+if missing_rbip_months:
+    print(f"NOTE: RBI Payments has no data for {missing_rbip_months} — those months will show as unavailable in the RBI Payments tab")
+
+def rbip_field(m, field):
+    r = rbip_by_iso.get(m)
+    return None if r is None else r.get(field)
+
+def lakh_to_cr(v):
+    return None if v is None else round(v / 100, 4)
+
+def cr_round(v):
+    return None if v is None else round(v, 4)
+
+# key -> Airtable column label prefix, for two-column (Volume/Value) metrics
+RBIP_VOLVAL_FIELDS = [
+    ("ccilTotal", "CCIL Total"), ("ccilGovtSecurities", "CCIL Govt Securities"),
+    ("ccilGovtOutright", "CCIL Govt Outright"), ("ccilGovtRepo", "CCIL Govt Repo"),
+    ("ccilGovtTripartyRepo", "CCIL Govt Tri-party Repo"), ("ccilForex", "CCIL Forex"),
+    ("ccilRupeeDerivatives", "CCIL Rupee Derivatives"), ("rtgsTotal", "RTGS Total"),
+    ("rtgsCustomer", "RTGS Customer"), ("rtgsInterbank", "RTGS Interbank"),
+    ("retailCreditTransfersTotal", "Retail Credit Transfers"), ("aeps", "AePS Fund Transfers"),
+    ("apbs", "APBS"), ("imps", "IMPS"), ("nachCr", "NACH Credit"), ("neft", "NEFT"), ("upi", "UPI"),
+    ("debitTransfersTotal", "Debit Transfers"), ("bhimAadhaarPay", "BHIM Aadhaar Pay"),
+    ("nachDr", "NACH Debit"), ("netc", "NETC Linked Account"), ("cardPaymentsTotal", "Card Payments"),
+    ("creditCards", "Credit Cards"), ("creditCardsPos", "Credit Cards PoS"), ("creditCardsOther", "Credit Cards Other"),
+    ("debitCards", "Debit Cards"), ("debitCardsPos", "Debit Cards PoS"), ("debitCardsOther", "Debit Cards Other"),
+    ("ppiTotal", "PPI Total"), ("ppiWallets", "PPI Wallets"), ("ppiCards", "PPI Cards"),
+    ("ppiCardsPos", "PPI Cards PoS"), ("ppiCardsOther", "PPI Cards Other"),
+    ("paperTotal", "Paper Instruments"), ("paperCts", "Paper CTS"),
+    ("totalRetailPayments", "Total Retail Payments"), ("totalPayments", "Total Payments"),
+    ("totalDigitalPayments", "Total Digital Payments"),
+    ("mobilePaymentsTotal", "Mobile Payments"), ("mobileIntrabank", "Mobile Intrabank"),
+    ("mobileInterbank", "Mobile Interbank"), ("internetPaymentsTotal", "Internet Payments"),
+    ("internetIntrabank", "Internet Intrabank"), ("internetInterbank", "Internet Interbank"),
+    ("atmCashWithdrawalTotal", "ATM Cash Withdrawal"), ("atmWithdrawalCredit", "ATM Withdrawal Credit Card"),
+    ("atmWithdrawalDebit", "ATM Withdrawal Debit Card"), ("atmWithdrawalPrepaid", "ATM Withdrawal Prepaid Card"),
+    ("posCashWithdrawalTotal", "PoS Cash Withdrawal"), ("posWithdrawalDebit", "PoS Withdrawal Debit Card"),
+    ("posWithdrawalPrepaid", "PoS Withdrawal Prepaid Card"), ("microAtmWithdrawalTotal", "Micro ATM Withdrawal"),
+    ("microAtmAeps", "Micro ATM AePS"),
+]
+RBIP_COUNT_FIELDS = [
+    ("cardsTotalCount", "Cards Total Count"), ("creditCardsCount", "Credit Cards Count"),
+    ("debitCardsCount", "Debit Cards Count"), ("ppiTotalCount", "PPI Total Count"),
+    ("ppiWalletsCount", "PPI Wallets Count"), ("ppiCardsCount", "PPI Cards Count"),
+    ("atmsCrmsCount", "ATMs and CRMs Count"), ("atmsBankOwnedCount", "Bank Owned ATMs Count"),
+    ("atmsWhiteLabelCount", "White Label ATMs Count"), ("microAtmsCount", "Micro ATMs Count"),
+    ("posTerminalsCount", "PoS Terminals Count"), ("bharatQrCount", "Bharat QR Count"),
+    ("upiQrCount", "UPI QR Count"),
+]
+
+rbip_month_blocks = []
+for m in app_months:
+    parts = []
+    for key, label in RBIP_VOLVAL_FIELDS:
+        vol = lakh_to_cr(rbip_field(m, f"{label} Volume"))
+        val = cr_round(rbip_field(m, f"{label} Value"))
+        parts.append(f"{key}:{{vol:{js_num(vol)}, val:{js_num(val)}}}")
+    for key, label in RBIP_COUNT_FIELDS:
+        parts.append(f"{key}:{js_num(lakh_to_cr(rbip_field(m, label)))}")
+    rbip_month_blocks.append("  {" + ", ".join(parts) + "}")
+rbipaymentsbymonth_js = "[\n" + ",\n".join(rbip_month_blocks) + "\n]"
+
 # ---------------- Circulars (all rows, newest first) ----------------
 def circular_sort_key(r):
     fy = r.get("FY", "")
@@ -304,6 +373,7 @@ html = replace_var(html, "rbiMicroAtm", rbimicroatm_js, "[", "]")
 html = replace_var(html, "rbiCreditCards", rbicreditcards_js, "[", "]")
 html = replace_var(html, "rbiDebitCards", rbidebitcards_js, "[", "]")
 html = replace_var(html, "rbiTxnByMonth", rbitxnbymonth_js, "[", "]")
+html = replace_var(html, "rbiPaymentsByMonth", rbipaymentsbymonth_js, "[", "]")
 html = re.sub(r"var\s+regLabels\s*=\s*\[.*?\];", f"var regLabels={reg_labels_js};", html, count=1, flags=re.DOTALL)
 html = re.sub(r"var\s+regData\s*=\s*\[.*?\];", f"var regData={reg_data_js};", html, count=1, flags=re.DOTALL)
 html = re.sub(r"var\s+execLabels\s*=\s*\[.*?\];", f"var execLabels={exec_labels_js};", html, count=1, flags=re.DOTALL)
@@ -341,4 +411,4 @@ with open(DASHBOARD_PATH, "w") as f:
     f.write(html)
 
 print("Regeneration complete.")
-print(f"Latest UPI month: {last_month_long} | AutoPay month: {ap_reg_month_long} | Circulars: {circulars_count} | RBI Cards months: {len(app_months) - len(missing_rbi_months)}/{len(app_months)}")
+print(f"Latest UPI month: {last_month_long} | AutoPay month: {ap_reg_month_long} | Circulars: {circulars_count} | RBI Cards months: {len(app_months) - len(missing_rbi_months)}/{len(app_months)} | RBI Payments months: {len(app_months) - len(missing_rbip_months)}/{len(app_months)}")
