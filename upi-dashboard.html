@@ -538,18 +538,28 @@ var rbiTxnByMonth = [
 
 // ---------- Normalize every Volume/count figure to Crore (1 Cr = 10 Mn = 1e7), one time, so it matches
 // Value figures (already in Cr) across UPI, UPI AutoPay and RBI Cards. Data above is embedded/regenerated
-// in each source's native unit (NPCI: Mn; RBI: raw actuals) — this is the single place that converts it.
-mVol = mVol.map(function(v){ return v==null?null:v/10; });
-monthTotalVol = monthTotalVol.map(function(v){ return v/10; });
-Object.keys(appData).forEach(function(n){ appData[n].vol = appData[n].vol.map(function(v){ return v/10; }); });
-p2pData.forEach(function(d){ d.p2pVol = d.p2pVol/10; d.p2mVol = d.p2mVol/10; });
-categoriesByMonth.forEach(function(monthCats){ monthCats.forEach(function(c){ c.vol = c.vol/10; }); });
-rbiAtms = rbiAtms.map(function(v){ return v/1e7; });
-rbiPos = rbiPos.map(function(v){ return v/1e7; });
-rbiMicroAtm = rbiMicroAtm.map(function(v){ return v/1e7; });
-rbiCreditCards = rbiCreditCards.map(function(v){ return v/10; });
-rbiDebitCards = rbiDebitCards.map(function(v){ return v/10; });
-rbiTxnByMonth.forEach(function(t){ Object.keys(t).forEach(function(k){ t[k].vol = t[k].vol/10; }); });
+// in each source's native unit — this is the single place that converts it. IMPORTANT: nothing above this
+// point in the file may read mVol/appData/p2pData/categoriesByMonth/rbi* before this block runs, or it'll
+// see un-converted values with no error. All values here can be null (a month regenerate_dashboard.py had
+// no source data for) — divide-by-null would silently become 0, so every line below guards for null first.
+//
+// Two different divisors are used, and they are NOT interchangeable — which one applies depends on what
+// unit regenerate_dashboard.py already left the value in, not on which array it happens to sit next to:
+//   ÷10   — value is already in Millions (NPCI's own unit, or RBI fields regenerate_dashboard.py's
+//           vol_mn() pre-divided by 1e6): 1 Cr = 10 Mn.
+//   ÷1e7  — value is still a raw actual count straight from RBI (never pre-divided): 1 Cr = 1e7 units.
+function divBy(v, d){ return v==null ? null : v/d; }
+mVol = mVol.map(function(v){ return divBy(v, 10); });
+monthTotalVol = monthTotalVol.map(function(v){ return divBy(v, 10); });
+Object.keys(appData).forEach(function(n){ appData[n].vol = appData[n].vol.map(function(v){ return divBy(v, 10); }); });
+p2pData.forEach(function(d){ d.p2pVol = divBy(d.p2pVol, 10); d.p2mVol = divBy(d.p2mVol, 10); });
+categoriesByMonth.forEach(function(monthCats){ monthCats.forEach(function(c){ c.vol = divBy(c.vol, 10); }); });
+rbiAtms = rbiAtms.map(function(v){ return divBy(v, 1e7); });        // raw actuals
+rbiPos = rbiPos.map(function(v){ return divBy(v, 1e7); });          // raw actuals
+rbiMicroAtm = rbiMicroAtm.map(function(v){ return divBy(v, 1e7); });// raw actuals
+rbiCreditCards = rbiCreditCards.map(function(v){ return divBy(v, 10); }); // pre-divided to Mn by vol_mn()
+rbiDebitCards = rbiDebitCards.map(function(v){ return divBy(v, 10); });   // pre-divided to Mn by vol_mn()
+rbiTxnByMonth.forEach(function(t){ Object.keys(t).forEach(function(k){ t[k].vol = divBy(t[k].vol, 10); }); }); // pre-divided to Mn
 
 function renderGeo(){
   var granularity = geoGranularity[selectedIdx];
@@ -639,15 +649,32 @@ function renderRBICardsChart(){
       plugins:{legend:{display:true,position:'bottom',labels:{boxWidth:10,font:{size:11}}}} } });
 }
 
+// Single source of truth for RBI channel display names AND spend-vs-withdrawal classification —
+// rbiCreditTotal/rbiDebitTotal (the "spends only" split) and the channel table/CSV exports all derive
+// from this one map, so a future added channel needs exactly one edit here, not two in sync.
+var RBI_CHANNEL_META = {
+  cPos:{label:'Credit card — PoS', side:'credit', spend:true},
+  cOnl:{label:'Credit card — Online/e-com', side:'credit', spend:true},
+  cOth:{label:'Credit card — Other txns', side:'credit', spend:true},
+  cAtm:{label:'Credit card — ATM withdrawal', side:'credit', spend:false},
+  dPos:{label:'Debit card — PoS', side:'debit', spend:true},
+  dOnl:{label:'Debit card — Online/e-com', side:'debit', spend:true},
+  dOth:{label:'Debit card — Other txns', side:'debit', spend:true},
+  dAtm:{label:'Debit card — ATM withdrawal', side:'debit', spend:false},
+  dPosW:{label:'Debit card — PoS cash withdrawal', side:'debit', spend:false}
+};
+var RBI_CHANNEL_LABELS = {};
+Object.keys(RBI_CHANNEL_META).forEach(function(k){ RBI_CHANNEL_LABELS[k] = RBI_CHANNEL_META[k].label; });
+
 // Spends only — excludes cash withdrawal channels (cAtm, dAtm, dPosW), which are cash-out, not spend.
-function rbiCreditTotal(idx, field){
+function rbiSideTotal(idx, side, field){
   var t = rbiTxnByMonth[idx];
-  return t.cPos[field]+t.cOnl[field]+t.cOth[field];
+  return Object.keys(RBI_CHANNEL_META).filter(function(k){
+    return RBI_CHANNEL_META[k].side===side && RBI_CHANNEL_META[k].spend;
+  }).reduce(function(sum,k){ return sum + (t[k][field]||0); }, 0);
 }
-function rbiDebitTotal(idx, field){
-  var t = rbiTxnByMonth[idx];
-  return t.dPos[field]+t.dOnl[field]+t.dOth[field];
-}
+function rbiCreditTotal(idx, field){ return rbiSideTotal(idx, 'credit', field); }
+function rbiDebitTotal(idx, field){ return rbiSideTotal(idx, 'debit', field); }
 
 function renderRBISplit(){
   var creditVol = rbiCreditTotal(selectedIdx,'vol'), debitVol = rbiDebitTotal(selectedIdx,'vol');
@@ -662,30 +689,27 @@ function renderRBISplit(){
   document.getElementById('rbiSplitNote').textContent = allMonthsFull[selectedIdx];
 }
 
-var RBI_CHANNEL_LABELS = {
-  cPos:'Credit card — PoS', cOnl:'Credit card — Online/e-com', cOth:'Credit card — Other txns', cAtm:'Credit card — ATM withdrawal',
-  dPos:'Debit card — PoS', dOnl:'Debit card — Online/e-com', dOth:'Debit card — Other txns', dAtm:'Debit card — ATM withdrawal', dPosW:'Debit card — PoS cash withdrawal'
-};
+function fmtRbiNum(v, digits){ return v==null ? '—' : v.toLocaleString('en-IN',{maximumFractionDigits:digits}); }
 
 function renderRBIChannelTable(){
   var t = rbiTxnByMonth[selectedIdx];
-  var rows = Object.keys(RBI_CHANNEL_LABELS).map(function(k){ return {key:k, vol:t[k].vol, val:t[k].val}; });
-  rows.sort(function(a,b){ return metric==='volume' ? b.vol-a.vol : b.val-a.val; });
+  var rows = Object.keys(RBI_CHANNEL_META).map(function(k){ return {key:k, vol:t[k].vol, val:t[k].val}; });
+  rows.sort(function(a,b){ return metric==='volume' ? (b.vol||0)-(a.vol||0) : (b.val||0)-(a.val||0); });
   var html = '';
   rows.forEach(function(r){
     var ticket = r.val/r.vol;
-    html += '<tr><td class="name">'+RBI_CHANNEL_LABELS[r.key]+'</td><td>'+r.vol.toLocaleString('en-IN',{maximumFractionDigits:4})+'</td><td>'+r.val.toLocaleString('en-IN',{maximumFractionDigits:0})+'</td><td>₹'+(isFinite(ticket)?ticket.toFixed(0):'—')+'</td></tr>';
+    html += '<tr><td class="name">'+RBI_CHANNEL_LABELS[r.key]+'</td><td>'+fmtRbiNum(r.vol,4)+'</td><td>'+fmtRbiNum(r.val,0)+'</td><td>'+(isFinite(ticket)?'₹'+ticket.toFixed(0):'—')+'</td></tr>';
   });
   document.getElementById('rbiChannelTable').innerHTML = html;
   document.getElementById('rbiChannelNote').textContent = allMonthsFull[selectedIdx];
   window._rbiChannelRows = rows;
 }
 
-function fmtCardCount(cr){ return cr.toFixed(2)+' Cr'; }
+function fmtCardCount(cr){ return cr==null ? '—' : cr.toFixed(2)+' Cr'; }
 
 function renderRBIKpis(){
-  document.getElementById('rbiAtmsKpi').textContent = rbiAtms[selectedIdx].toFixed(4)+' Cr';
-  document.getElementById('rbiPosKpi').textContent = rbiPos[selectedIdx].toFixed(2)+' Cr';
+  document.getElementById('rbiAtmsKpi').textContent = rbiAtms[selectedIdx]==null ? '—' : rbiAtms[selectedIdx].toFixed(4)+' Cr';
+  document.getElementById('rbiPosKpi').textContent = rbiPos[selectedIdx]==null ? '—' : rbiPos[selectedIdx].toFixed(2)+' Cr';
   document.getElementById('rbiCreditKpi').textContent = fmtCardCount(rbiCreditCards[selectedIdx]);
   document.getElementById('rbiDebitKpi').textContent = fmtCardCount(rbiDebitCards[selectedIdx]);
 }
@@ -838,6 +862,27 @@ document.querySelectorAll('[data-raw]').forEach(function(btn){
   });
 });
 
+// Shared RBI CSV row-builders — used by both the per-section CSV button and "Download all data",
+// so the two never drift apart (this exact divergence already happened once for the Leaderboard export).
+function buildRbiInfraRows(){
+  var rows = [['Month','ATMs & CRMs (Cr)','PoS Terminals (Cr)','Micro ATMs (Cr)']];
+  for (var i=0;i<allMonths.length;i++){ rows.push([allMonths[i], rbiAtms[i], rbiPos[i], rbiMicroAtm[i]]); }
+  return rows;
+}
+function buildRbiCardsRows(){
+  var rows = [['Month','Credit Cards (Cr)','Debit Cards (Cr)']];
+  for (var i=0;i<allMonths.length;i++){ rows.push([allMonths[i], rbiCreditCards[i], rbiDebitCards[i]]); }
+  return rows;
+}
+function buildRbiChannelRows(){
+  var rows = [['Channel','Volume (Cr)','Value (Cr)','Avg ticket (Rs)']];
+  (window._rbiChannelRows||[]).forEach(function(r){
+    var ticket = r.val/r.vol;
+    rows.push([RBI_CHANNEL_LABELS[r.key], r.vol, r.val, isFinite(ticket)?ticket.toFixed(0):'']);
+  });
+  return rows;
+}
+
 document.querySelectorAll('[data-csv]').forEach(function(btn){
   btn.addEventListener('click', function(){
     var key = btn.dataset.csv, rows=[];
@@ -871,14 +916,11 @@ document.querySelectorAll('[data-csv]').forEach(function(btn){
       rows.push(['Bank','Executions (Cr)']);
       window._execLabels.forEach(function(l,i){ rows.push([l, window._execData[i]]); });
     } else if (key==='rbiInfra'){
-      rows.push(['Month','ATMs & CRMs','PoS Terminals','Micro ATMs']);
-      for (var ri=0;ri<allMonths.length;ri++){ rows.push([allMonths[ri], rbiAtms[ri], rbiPos[ri], rbiMicroAtm[ri]]); }
+      rows = buildRbiInfraRows();
     } else if (key==='rbiCardsOutstanding'){
-      rows.push(['Month','Credit Cards (Cr)','Debit Cards (Cr)']);
-      for (var rj=0;rj<allMonths.length;rj++){ rows.push([allMonths[rj], rbiCreditCards[rj], rbiDebitCards[rj]]); }
+      rows = buildRbiCardsRows();
     } else if (key==='rbiChannel'){
-      rows.push(['Channel','Volume (Cr)','Value (Cr)','Avg ticket (Rs)']);
-      (window._rbiChannelRows||[]).forEach(function(r){ rows.push([RBI_CHANNEL_LABELS[r.key], r.vol, r.val, (r.val/r.vol).toFixed(0)]); });
+      rows = buildRbiChannelRows();
     }
     downloadCSV('upi-pulse-'+key+'.csv', rows);
   });
@@ -898,12 +940,9 @@ document.getElementById('downloadAllBtn').addEventListener('click', function(){
   }
   if (currentView === 'rbi'){
     var rbiRows = [['RBI Cards — full data export'],['Source: RBI Bank-wise ATM/POS/Card Statistics, monthly Total row'],[]];
-    rbiRows.push(['INFRASTRUCTURE']); rbiRows.push(['Month','ATMs & CRMs','PoS Terminals','Micro ATMs']);
-    for (var rk=0;rk<allMonths.length;rk++){ rbiRows.push([allMonths[rk], rbiAtms[rk], rbiPos[rk], rbiMicroAtm[rk]]); }
-    rbiRows.push([]); rbiRows.push(['CARDS OUTSTANDING']); rbiRows.push(['Month','Credit Cards (Cr)','Debit Cards (Cr)']);
-    for (var rl=0;rl<allMonths.length;rl++){ rbiRows.push([allMonths[rl], rbiCreditCards[rl], rbiDebitCards[rl]]); }
-    rbiRows.push([]); rbiRows.push(['TRANSACTIONS BY CHANNEL ('+allMonths[selectedIdx]+')']); rbiRows.push(['Channel','Volume (Cr)','Value (Cr)','Avg ticket (Rs)']);
-    (window._rbiChannelRows||[]).forEach(function(r){ rbiRows.push([RBI_CHANNEL_LABELS[r.key], r.vol, r.val, (r.val/r.vol).toFixed(0)]); });
+    rbiRows.push(['INFRASTRUCTURE']); buildRbiInfraRows().forEach(function(r){ rbiRows.push(r); });
+    rbiRows.push([]); rbiRows.push(['CARDS OUTSTANDING']); buildRbiCardsRows().forEach(function(r){ rbiRows.push(r); });
+    rbiRows.push([]); rbiRows.push(['TRANSACTIONS BY CHANNEL ('+allMonths[selectedIdx]+')']); buildRbiChannelRows().forEach(function(r){ rbiRows.push(r); });
     downloadCSV('upi-pulse-rbi-cards-full-data.csv', rbiRows);
     return;
   }
@@ -923,16 +962,17 @@ var viewAutopay = document.getElementById('viewAutopay');
 var viewRBI = document.getElementById('viewRBI');
 var metricToggleEl = document.getElementById('metricToggle');
 var VIEW_PANELS = {upi: viewUPI, autopay: viewAutopay, rbi: viewRBI};
-// Only AutoPay is a fixed single-month snapshot with no history — its controls are hidden.
-// UPI and RBI Cards both share the same Jan 2025 - Jun 2026 timeline via the year/month selector.
-var VIEWS_WITH_SELECTOR = {upi: true, rbi: true};
+// Only AutoPay is a fixed single-month snapshot with no history — its controls are hidden. UPI and RBI
+// Cards both share the same Jan 2025 - Jun 2026 timeline via the year/month selector, so any future view
+// added to VIEW_PANELS gets the selector by default unless it's named here as a snapshot-style exception.
+var VIEWS_WITHOUT_SELECTOR = {autopay: true};
 toggleBtns.forEach(function(btn){
   btn.addEventListener('click', function(){
     toggleBtns.forEach(function(b){ b.classList.remove('active'); b.setAttribute('aria-selected','false'); });
     btn.classList.add('active'); btn.setAttribute('aria-selected','true');
     currentView = btn.dataset.view;
     Object.keys(VIEW_PANELS).forEach(function(v){ VIEW_PANELS[v].style.display = (v===currentView) ? '' : 'none'; });
-    var showSelector = !!VIEWS_WITH_SELECTOR[currentView];
+    var showSelector = !VIEWS_WITHOUT_SELECTOR[currentView];
     metricToggleEl.style.display = showSelector ? '' : 'none';
     yearSelectEl.style.display = showSelector ? '' : 'none';
     monthSelectEl.style.display = showSelector ? '' : 'none';

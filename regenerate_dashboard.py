@@ -190,19 +190,34 @@ geo_granularity_js = "[" + ",".join(f"'{g}'" for g in geo_granularity) + "]"
 geo_js = "[\n" + ",\n".join(geo_month_blocks) + "\n]"
 
 # ---------------- RBI Cards (national totals, Jan 2025 - Jun 2026) — separate bucket, not part of UPI ----------------
-rbi_months = sorted(set(r["Month"] for r in rbi_cards if r["Month"].startswith(SELECTOR_YEARS)), key=month_key)
-if rbi_months != app_months:
-    print(f"NOTE: RBI Cards months {rbi_months} differ from App Stats months {app_months} — selector indices may not line up")
+# Built against app_months (not RBI's own month list) so rbi* arrays are ALWAYS exactly len(app_months) long —
+# selectedIdx in the dashboard is driven by app_months/allMonths, so a shorter RBI array would index out of
+# bounds and crash. Any month RBI Cards hasn't been ingested for yet gets None (JS null) instead of missing.
 rbi_by_iso = {r["Month"]: r for r in rbi_cards}
+missing_rbi_months = [m for m in app_months if m not in rbi_by_iso]
+if missing_rbi_months:
+    print(f"NOTE: RBI Cards has no data for {missing_rbi_months} — those months will show as unavailable in the RBI Cards tab")
 
-def vol_mn(r, field): return round(r[field] / 1e6, 4)
-def val_cr(r, field): return round(r[field] / 1e4, 4)
+def rbi_field(m, field):
+    r = rbi_by_iso.get(m)
+    return None if r is None else r.get(field)
 
-rbi_atms = [rbi_by_iso[m]["ATMs Onsite"] + rbi_by_iso[m]["ATMs Offsite"] for m in rbi_months]
-rbi_pos = [rbi_by_iso[m]["PoS Terminals"] for m in rbi_months]
-rbi_microatm = [rbi_by_iso[m]["Micro ATMs"] for m in rbi_months]
-rbi_credit_cards = [vol_mn(rbi_by_iso[m], "Credit Cards Outstanding") for m in rbi_months]
-rbi_debit_cards = [vol_mn(rbi_by_iso[m], "Debit Cards Outstanding") for m in rbi_months]
+def vol_mn(m, field):
+    v = rbi_field(m, field)
+    return None if v is None else round(v / 1e6, 4)
+
+def val_cr(m, field):
+    v = rbi_field(m, field)
+    return None if v is None else round(v / 1e4, 4)
+
+rbi_atms, rbi_pos, rbi_microatm, rbi_credit_cards, rbi_debit_cards = [], [], [], [], []
+for m in app_months:
+    onsite, offsite = rbi_field(m, "ATMs Onsite"), rbi_field(m, "ATMs Offsite")
+    rbi_atms.append(None if onsite is None or offsite is None else onsite + offsite)
+    rbi_pos.append(rbi_field(m, "PoS Terminals"))
+    rbi_microatm.append(rbi_field(m, "Micro ATMs"))
+    rbi_credit_cards.append(vol_mn(m, "Credit Cards Outstanding"))
+    rbi_debit_cards.append(vol_mn(m, "Debit Cards Outstanding"))
 
 rbiatms_js = "[" + ",".join(js_num(v) for v in rbi_atms) + "]"
 rbipos_js = "[" + ",".join(js_num(v) for v in rbi_pos) + "]"
@@ -224,9 +239,8 @@ RBI_CHANNEL_FIELDS = [
 ]
 
 rbi_txn_blocks = []
-for m in rbi_months:
-    r = rbi_by_iso[m]
-    parts = [f"{key}:{{vol:{js_num(vol_mn(r,volf))}, val:{js_num(val_cr(r,valf))}}}" for key, volf, valf in RBI_CHANNEL_FIELDS]
+for m in app_months:
+    parts = [f"{key}:{{vol:{js_num(vol_mn(m,volf))}, val:{js_num(val_cr(m,valf))}}}" for key, volf, valf in RBI_CHANNEL_FIELDS]
     rbi_txn_blocks.append("  {" + ", ".join(parts) + "}")
 rbitxnbymonth_js = "[\n" + ",\n".join(rbi_txn_blocks) + "\n]"
 
@@ -327,4 +341,4 @@ with open(DASHBOARD_PATH, "w") as f:
     f.write(html)
 
 print("Regeneration complete.")
-print(f"Latest UPI month: {last_month_long} | AutoPay month: {ap_reg_month_long} | Circulars: {circulars_count} | RBI Cards months: {len(rbi_months)}")
+print(f"Latest UPI month: {last_month_long} | AutoPay month: {ap_reg_month_long} | Circulars: {circulars_count} | RBI Cards months: {len(app_months) - len(missing_rbi_months)}/{len(app_months)}")
