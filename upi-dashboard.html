@@ -816,7 +816,9 @@ var RBIP_SETTLEMENT_META = [
   ['ppiTotal','Prepaid Payment Instruments', 0], ['ppiWallets','Wallets', 1], ['ppiCards','Cards', 1],
   ['ppiCardsPos','PoS based', 2], ['ppiCardsOther','Other (incl. online)', 2],
   ['paperTotal','Paper-based Instruments', 0], ['paperCts','CTS (NPCI managed)', 1],
-  ['totalRetailPayments','Total Retail Payments', 0, true], ['totalPayments','Total Payments', 0, true], ['totalDigitalPayments','Total Digital Payments', 0, true]
+  ['totalRetailPayments','Total Retail Payments', 0, true, 'Retail Credit Transfers + Debit Transfers + Card Payments + PPI + Paper'],
+  ['totalPayments','Total Payments', 0, true, 'RTGS + Retail Credit Transfers + Debit Transfers + Card Payments + PPI + Paper'],
+  ['totalDigitalPayments','Total Digital Payments', 0, true, 'RTGS + Retail Credit Transfers + Debit Transfers + Card Payments + PPI (everything above except Paper)']
 ];
 var RBIP_CHANNELS_META = [
   ['mobilePaymentsTotal','Mobile Payments (app-based)', 0], ['mobileIntrabank','Intra-bank', 1], ['mobileInterbank','Inter-bank', 1],
@@ -882,23 +884,37 @@ function renderRBIPaymentsKpis(){
   document.getElementById('rbipRtgsKpi').textContent = m ? fmtCr(m.rtgsTotal.val) : '—';
 }
 
-function rbipLabelCell(label, depth, isGrandTotal){
-  var style = 'padding-left:'+(depth*18)+'px;' + (depth===0 || isGrandTotal ? 'font-weight:600;' : 'color:var(--text-secondary);');
-  return '<td class="name" style="'+style+'">'+label+'</td>';
+// Three distinct visual levels so a reader can tell "category" from "sub-category" from "sub-sub-category"
+// at a glance, not just by indent width: depth 0 is a bold section header in full-brightness text, depth 1
+// is a regular-weight sub-category in secondary text, depth 2 (e.g. PoS based / Other, nested under Credit
+// Cards, nested under Card Payments) is smaller and muted so it visibly reads as one level deeper than depth 1.
+function rbipLabelCell(label, depth, isGrandTotal, formula){
+  var style, text = label;
+  if (isGrandTotal){
+    style = 'font-weight:700;';
+    if (formula) text += '<br><span style="font-weight:400;font-size:11.5px;color:var(--text-muted);">= '+formula+'</span>';
+  } else if (depth === 0){
+    style = 'font-weight:600;color:var(--text);';
+  } else if (depth === 1){
+    style = 'padding-left:18px;font-weight:400;color:var(--text-secondary);';
+  } else {
+    style = 'padding-left:36px;font-weight:400;font-size:12px;color:var(--text-muted);';
+  }
+  return '<td class="name" style="'+style+'">'+text+'</td>';
 }
 
 function renderRBIPFlatTable(meta, tbodyId){
   var m = rbiPaymentsByMonth[selectedIdx];
   if (!m){ document.getElementById(tbodyId).innerHTML = ''; return []; }
   var rows = meta.map(function(entry){
-    var key=entry[0], label=entry[1], depth=entry[2], isGrandTotal=!!entry[3];
-    return {key:key, label:label, depth:depth, isGrandTotal:isGrandTotal, vol:m[key].vol, val:m[key].val};
+    var key=entry[0], label=entry[1], depth=entry[2], isGrandTotal=!!entry[3], formula=entry[4];
+    return {key:key, label:label, depth:depth, isGrandTotal:isGrandTotal, formula:formula, vol:m[key].vol, val:m[key].val};
   });
   var html = '';
   rows.forEach(function(r){
     var ticket = r.val/r.vol;
     var rowStyle = r.isGrandTotal ? ' style="border-top:1px solid var(--border);"' : '';
-    html += '<tr'+rowStyle+'>'+rbipLabelCell(r.label, r.depth, r.isGrandTotal)+'<td>'+fmtRbiNum(r.vol,4)+'</td><td>'+fmtRbiNum(r.val,0)+'</td><td>'+(isFinite(ticket)?'₹'+ticket.toFixed(0):'—')+'</td></tr>';
+    html += '<tr'+rowStyle+'>'+rbipLabelCell(r.label, r.depth, r.isGrandTotal, r.formula)+'<td>'+fmtRbiNum(r.vol,4)+'</td><td>'+fmtRbiNum(r.val,0)+'</td><td>'+(isFinite(ticket)?'₹'+ticket.toFixed(0):'—')+'</td></tr>';
   });
   document.getElementById(tbodyId).innerHTML = html;
   return rows;
