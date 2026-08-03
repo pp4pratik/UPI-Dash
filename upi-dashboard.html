@@ -122,6 +122,7 @@
         <option value="autopay">UPI AutoPay</option>
         <option value="rbi">RBI Cards</option>
         <option value="rbipayments">RBI Payments</option>
+        <option value="circulars">Circulars</option>
       </select>
       <div class="toggle" id="metricToggle" role="tablist">
         <button class="toggle-btn active metric" data-metric="volume" role="tab" aria-selected="true">Volume</button>
@@ -203,24 +204,11 @@
     <div class="card"><div style="position:relative;height:240px;"><canvas id="ticketChart" role="img" aria-label="Bar chart of average ticket size by app"></canvas></div></div>
   </div>
 
-  <div class="section" id="circularsSection">
-    <div class="section-head">
-      <p class="section-title">Circulars & notifications</p>
-      <div class="section-actions"><p class="section-note">NPCI · UPI · 2025–2026, newest first</p><button class="mini-btn" data-csv="circulars">Download CSV</button></div>
-    </div>
-    <div class="card">
-      <input type="text" class="circular-search" id="circularSearch" placeholder="Search circulars by keyword or OC number...">
-      <div class="circular-list"><table><thead><tr><th>Ref</th><th>FY</th><th>Title</th><th>PDF</th></tr></thead><tbody id="circularTable"></tbody></table></div>
-      <p class="section-note" style="margin-top:14px;">Covers all circulars listed under NPCI's 2025 and 2026 filters (34 total). Earlier years (2022–2024) and archived circulars are on <a href="https://www.npci.org.in/circulars/upi" target="_blank" rel="noopener" style="color:var(--teal);">NPCI's site</a> directly.</p>
-    </div>
-  </div>
-
   <div class="footer">
     <p class="footer-title">Source</p>
     <div class="sources">
       <a href="https://www.npci.org.in/product/upi/product-statistics" target="_blank" rel="noopener">NPCI — UPI Product Statistics</a>
       <a href="https://www.npci.org.in/product/ecosystem-statistics/upi" target="_blank" rel="noopener">NPCI — UPI Ecosystem Statistics</a>
-      <a href="https://www.npci.org.in/circulars/upi" target="_blank" rel="noopener">NPCI — UPI Circulars & Notifications</a>
     </div>
     <p class="disclaimer">All figures pulled directly from NPCI's official statistics pages on 28 Jul 2026. App leaderboard, P2P/P2M split, merchant categories, geography, and average ticket size are all month-selectable for Jan 2025–Jun 2026 via the month picker above. NPCI only published a district-level geography breakdown for Mar–Jun 2026; all of 2025 and Jan–Feb 2026 show state-level figures instead since that's all NPCI published for those months. Ticket size (overall and by P2P/P2M) is computed by this dashboard from NPCI's volume/value figures, not published directly by NPCI. NPCI states it makes no warranty on completeness or continued validity of this data.</p>
   </div>
@@ -358,6 +346,28 @@
       <p class="footer-title">Source</p>
       <div class="sources"><a href="https://rbi.org.in/Scripts/Statistics.aspx" target="_blank" rel="noopener">RBI — Payment System Indicators</a></div>
       <p class="disclaimer">National totals from RBI's monthly "Payment System Indicators" release (rbi.org.in), Jan 2025 – Jun 2026. This is RBI's own economy-wide payment-systems dataset — a different release from NPCI's UPI figures and from RBI's Bank-wise ATM/POS/Card Statistics (the RBI Cards tab above), so figures for overlapping categories like UPI or card payments may not exactly match those other tabs; each tab reflects its own source exactly as published, with no reconciliation between them. Volumes are converted from RBI's native lakh unit to Crore (÷100); values are already published in ₹ Crore. RBI states the data is provisional and subject to revision.</p>
+    </div>
+
+  </div>
+
+  <div id="viewCirculars" style="display:none;">
+
+    <div class="section" id="circularsSection">
+      <div class="section-head">
+        <p class="section-title">Circulars & notifications</p>
+        <div class="section-actions"><p class="section-note">NPCI · UPI · 2025–2026, newest first</p><button class="mini-btn" data-csv="circulars">Download CSV</button></div>
+      </div>
+      <div class="card">
+        <input type="text" class="circular-search" id="circularSearch" placeholder="Search circulars by keyword or OC number...">
+        <div class="circular-list"><table><thead><tr><th>Ref</th><th>FY</th><th>Title</th><th>PDF</th></tr></thead><tbody id="circularTable"></tbody></table></div>
+        <p class="section-note" style="margin-top:14px;">Covers all circulars listed under NPCI's 2025 and 2026 filters (34 total). Earlier years (2022–2024) and archived circulars are on <a href="https://www.npci.org.in/circulars/upi" target="_blank" rel="noopener" style="color:var(--teal);">NPCI's site</a> directly.</p>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p class="footer-title">Source</p>
+      <div class="sources"><a href="https://www.npci.org.in/circulars/upi" target="_blank" rel="noopener">NPCI — UPI Circulars & Notifications</a></div>
+      <p class="disclaimer">Operating circulars and notifications issued by NPCI for UPI, covering NPCI's 2025 and 2026 filters. This is a reference/document list, not numeric statistics — there's no month or metric to select, which is why the selector and Volume/Value toggle above are hidden on this tab.</p>
     </div>
 
   </div>
@@ -1216,13 +1226,17 @@ document.getElementById('downloadAllBtn').addEventListener('click', function(){
     downloadCSV('upi-pulse-rbi-payments-full-data.csv', rbipRows);
     return;
   }
+  if (currentView === 'circulars'){
+    var circRows = [['Reference','FY','Title','PDF URL']];
+    circulars.forEach(function(c){ circRows.push([c.ref,c.fy,c.title,c.pdf||'']); });
+    downloadCSV('upi-pulse-circulars.csv', circRows);
+    return;
+  }
   var rows = [['UPI Pulse — full data export'],['Source: NPCI Product & Ecosystem Statistics, pulled 28 Jul 2026'],[]];
   rows.push(['MONTHLY TREND']); rows.push(['Month','Volume (Cr)','MoM %','YoY %','Value (Cr)','MoM %','YoY %']);
   for (var i=0;i<months.length;i++){ rows.push([months[i], mVol[i]||'', mom(mVol,i)||'', yoy(mVol,i)||'', mVal[i]||'', mom(mVal,i)||'', yoy(mVal,i)||'']); }
   rows.push([]); rows.push(['APP LEADERBOARD ('+allMonths[selectedIdx]+')']); rows.push(['App','Volume (Cr)','Value (Cr)','Avg ticket (Rs)']);
   sortedApps().forEach(function(n){ rows.push([n, appData[n].vol[selectedIdx], appData[n].val[selectedIdx], appTicket(n,selectedIdx).toFixed(0)]); });
-  rows.push([]); rows.push(['CIRCULARS']); rows.push(['Reference','FY','Title','PDF URL']);
-  circulars.forEach(function(c){ rows.push([c.ref,c.fy,c.title,c.pdf||'']); });
   downloadCSV('upi-pulse-full-data.csv', rows);
 });
 
@@ -1231,12 +1245,14 @@ var viewUPI = document.getElementById('viewUPI');
 var viewAutopay = document.getElementById('viewAutopay');
 var viewRBI = document.getElementById('viewRBI');
 var viewRBIPayments = document.getElementById('viewRBIPayments');
+var viewCirculars = document.getElementById('viewCirculars');
 var metricToggleEl = document.getElementById('metricToggle');
-var VIEW_PANELS = {upi: viewUPI, autopay: viewAutopay, rbi: viewRBI, rbipayments: viewRBIPayments};
-// Only AutoPay is a fixed single-month snapshot with no history — its controls are hidden. UPI and RBI
-// Cards both share the same Jan 2025 - Jun 2026 timeline via the year/month selector, so any future view
-// added to VIEW_PANELS gets the selector by default unless it's named here as a snapshot-style exception.
-var VIEWS_WITHOUT_SELECTOR = {autopay: true};
+var VIEW_PANELS = {upi: viewUPI, autopay: viewAutopay, rbi: viewRBI, rbipayments: viewRBIPayments, circulars: viewCirculars};
+// AutoPay is a fixed single-month snapshot with no history, and Circulars is a document list with no
+// month/metric axis at all — both have their controls hidden. UPI, RBI Cards, and RBI Payments all share
+// the same Jan 2025 - Jun 2026 timeline via the year/month selector, so any future view added to
+// VIEW_PANELS gets the selector by default unless it's named here as a snapshot/non-numeric exception.
+var VIEWS_WITHOUT_SELECTOR = {autopay: true, circulars: true};
 viewSelectEl.addEventListener('change', function(){
   currentView = viewSelectEl.value;
   Object.keys(VIEW_PANELS).forEach(function(v){ VIEW_PANELS[v].style.display = (v===currentView) ? '' : 'none'; });
